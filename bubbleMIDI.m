@@ -1,8 +1,11 @@
 classdef bubbleMIDI < audioPlugin
     % audio plugin for producing bubble sounds
 
-    properties (Dependent) % interface variables
+    properties
         r = 0.01; % radius 
+    end
+    
+    properties (Dependent)
         trig = 'noteOff'; % noteState
     end
     
@@ -12,13 +15,12 @@ classdef bubbleMIDI < audioPlugin
         buff; % buffer for generated waveform
         readIndex = 1; % reading position in buffer
         noteState = 'noteOff'; % note state
-        soundOut = 'false'; % boolean to decide whether to output the signal or not
+        soundOut = 'false'; % decides whether to output the signal or not
 
         % bubble parameters
         N; % signal length      
         a = 1; % initial amplitude 
         eps = 0.25; % epsilon
-        radius; % bubble radius (pitch)
     end
     
     properties (Constant)
@@ -33,30 +35,18 @@ classdef bubbleMIDI < audioPlugin
             obj.fs = (getSampleRate(obj));
             obj.N =(0:1/obj.fs:0.5);
             obj.buff = zeros(length(obj.N),1);
-            
-            obj.noteState = 'noteOff';
-            obj.radius = 0.01;
-            
-            obj.soundOut = 'false';
         end                                   
         
         function reset(obj)
             obj.fs = (getSampleRate(obj));
             obj.readIndex = 1;
-        end
-        
-        function set.r(obj, val) 
-            obj.radius = val;
-        end  
-        
-        function val = get.r(obj)
-            val = obj.radius;
-        end  
+            obj.soundOut = 'false';
+        end 
         
         function set.trig(obj, val)
             if val == 'noteOn_'
                 obj.readIndex = 1; % init readIndex
-                obj.buff = newBubble(obj.radius, obj.N, obj.a, obj.eps)'; % generate waveform 
+                obj.buff = newBubble(obj.r, obj.N, obj.a, obj.eps)'; % generate waveform 
                 obj.soundOut = 'true_';
             end
             obj.noteState = val;
@@ -78,7 +68,7 @@ classdef bubbleMIDI < audioPlugin
                      out = zeros(length(in),1);
                  end
              else
-                out = zeros(length(in),1);
+                 out = zeros(length(in),1);
                 
              end
         end  
