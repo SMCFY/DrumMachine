@@ -48,7 +48,8 @@ classdef bubbleMIDI < audioPlugin
         
         function set.trig(obj, val)
             if val == 'noteOn_'
-                obj.soundOut = 1;
+                obj.readIndex = 1; % init readIndex
+                obj.soundOut = 1; % note on
                 obj.buff = newBubble(obj.r, obj.N, obj.a, obj.eps)'; % generate waveform
             end
             obj.trig = val;            
@@ -61,10 +62,10 @@ classdef bubbleMIDI < audioPlugin
         function out = process(obj, in) 
 
              if obj.soundOut == 1
-                 if obj.readIndex < length(obj.buff)-length(in) % output sound
+                 if obj.readIndex < length(obj.buff)-length(in) % buffer length not exceeded - output sound
                      out = obj.buff(obj.readIndex:length(in)+obj.readIndex-1); % read from buffer      
                      obj.readIndex = obj.readIndex + length(in); % increment readIndex
-                 else
+                 else % buffer length exceeded - output zeros
                      obj.readIndex = 1; % init readIndex
                      obj.soundOut = 0; % note off
                      out = zeros(length(in),1);
