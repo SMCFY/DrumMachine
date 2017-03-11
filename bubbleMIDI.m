@@ -1,21 +1,24 @@
 classdef bubbleMIDI < audioPlugin
     % audio plugin for producing bubble sounds
 
-    properties
+    properties (Dependent) % interface variables
         r = 0.01; % radius 
-        trig = 'noteOff'; % trigger for sound generation
+        trig = 'noteOff'; % noteState
     end
     
     properties (Access = private)
+        % synth parameters
         fs; % sampling rate
         buff; % buffer for generated waveform
-        readIndex = 1;
-        soundOut = 0;
+        readIndex = 1; % reading position in buffer
+        noteState = 'noteOff'; % note state
+        soundOut = 'false'; % boolean to decide whether to output the signal or not
 
         % bubble parameters
         N; % signal length      
         a = 1; % initial amplitude 
         eps = 0.25; % epsilon
+        radius; % bubble radius (pitch)
     end
     
     properties (Constant)
@@ -30,44 +33,48 @@ classdef bubbleMIDI < audioPlugin
             obj.fs = (getSampleRate(obj));
             obj.N =(0:1/obj.fs:0.5);
             obj.buff = zeros(length(obj.N),1);
+            
+            obj.noteState = 'noteOff';
+            obj.radius = 0.01;
+            
+            obj.soundOut = 'false';
         end                                   
         
         function reset(obj)
             obj.fs = (getSampleRate(obj));
             obj.readIndex = 1;
-            obj.soundOut = 0;
         end
         
         function set.r(obj, val) 
-            obj.r = val;
+            obj.radius = val;
         end  
         
         function val = get.r(obj)
-            val = obj.r;
+            val = obj.radius;
         end  
         
         function set.trig(obj, val)
             if val == 'noteOn_'
                 obj.readIndex = 1; % init readIndex
-                obj.soundOut = 1; % note on
-                obj.buff = newBubble(obj.r, obj.N, obj.a, obj.eps)'; % generate waveform
+                obj.buff = newBubble(obj.radius, obj.N, obj.a, obj.eps)'; % generate waveform 
+                obj.soundOut = 'true_';
             end
-            obj.trig = val;            
+            obj.noteState = val;
         end 
         
         function val = get.trig(obj)
-            val = obj.trig;
+            val = obj.noteState;
         end 
         
         function out = process(obj, in) 
 
-             if obj.soundOut == 1
+             if obj.soundOut == 'true_' 
                  if obj.readIndex < length(obj.buff)-length(in) % buffer length not exceeded - output sound
                      out = obj.buff(obj.readIndex:length(in)+obj.readIndex-1); % read from buffer      
                      obj.readIndex = obj.readIndex + length(in); % increment readIndex
                  else % buffer length exceeded - output zeros
                      obj.readIndex = 1; % init readIndex
-                     obj.soundOut = 0; % note off
+                     obj.soundOut = 'false';
                      out = zeros(length(in),1);
                  end
              else
