@@ -2,7 +2,9 @@ classdef bubbleMIDI < audioPlugin
     % audio plugin for producing bubble sounds
 
     properties
+        %=================================== interfaced parameters
         r = 0.01; % radius 
+        %===================================
     end
     
     properties (Dependent)
@@ -10,17 +12,18 @@ classdef bubbleMIDI < audioPlugin
     end
     
     properties (Access = private)
-        % synth parameters
+        % vst parameters
         fs; % sampling rate
         buff; % buffer for generated waveform
         readIndex = 1; % reading position in buffer
         noteState = 'noteOff'; % note state
         soundOut = 'false'; % decides whether to output the signal or not
 
-        % bubble parameters
+        %=================================== internal parameters
         N; % signal length      
         a = 1; % initial amplitude 
         eps = 0.25; % epsilon
+        %===================================
     end
     
     properties (Constant)
@@ -45,9 +48,12 @@ classdef bubbleMIDI < audioPlugin
         
         function set.trig(obj, val)
             if val == 'noteOn_'
-                obj.readIndex = 1; % init readIndex
-                obj.buff = newBubble(obj.r, obj.N, obj.a, obj.eps)'; % generate waveform 
+                obj.readIndex = 1; % init readIndex 
                 obj.soundOut = 'true_';
+
+                %=================================== sound synthesis
+                obj.buff = newBubble(obj.r, obj.N, obj.a, obj.eps)'; % generate waveform
+                %===================================
             end
             obj.noteState = val;
         end 
@@ -95,6 +101,7 @@ classdef bubbleMIDI < audioPlugin
     end
 end
 %--------------------------------------------------------------------------
+%=================================== synth functions
 function bub = newBubble(r, N, a, eps)
     f0 = 3/r; % fundamental frequency
     d = 0.043 * f0 + 0.0014* f0^(3/2); % decay formula
@@ -102,3 +109,4 @@ function bub = newBubble(r, N, a, eps)
     ft = f0*(1+sigma*N); % rate of change in frequency over time
     bub = a*sin(2*pi*ft.*N).*exp(-d*N); % calculation of the bubble 
 end
+%===================================
