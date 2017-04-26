@@ -17,6 +17,8 @@ Tsamp = Tsec*fs; % duration of simulation (Samples)
 
 L = rand(n_modes, max(d)); % initialize delay line
 
+L = L;
+
 % m1=mean(L(1,:)); m2=mean(L(2,:)); m3=mean(L(3,:));
 % L(1,:) = L(1,:) - m1; % centerize
 % L(2,:) = L(2,:) - m2; % centerize
