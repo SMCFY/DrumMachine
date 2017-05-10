@@ -1,6 +1,6 @@
 %% Analyses (peak picking)
 
-[x fs] = audioread('tom_sample.wav');
+[x fs] = audioread('snare_sample.wav');
 
 fftSize = 1024; % window size
 window = x(1:fftSize).*hann(fftSize); % hanning window of the attack
@@ -18,14 +18,14 @@ plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2))); % spectrum in dBs
 title('magnitude spectrum');
 
 %% Filtering (cascade of 2nd order IIR notch filters)
-freq = [129 344 667 775]; % estimated peak frequencies in Hz
+freq = [193 366 495 646 796]; % estimated peak frequencies in Hz
 for i=1:length(freq)
     theta(i) = 2*pi*freq(1,i)/fs; % peak frequencies in radians/sample
 end
-bw = [50 50 50 50]; % peak bandwidth estimates in Hz
+bw = [20 50 50 50 50]; % peak bandwidth estimates in Hz
 res = x;
         
-r = 0.1; % zero/ploe factor
+r = 0.95; % zero/ploe factor
 
 figure();
 subplot(2,1,1);
@@ -62,7 +62,8 @@ exc = exc - mean(exc);
 exc = exc / max(exc);
 exc  = [exc; zeros(length(x)-length(exc),1)];
 
-exc = ifft(fft(res).*fft(exc)); % excitation convolved with residual
+%exc = ifft(fft(res).*fft(exc)); % excitation convolved with residual
+exc = conv(exc,res);
 
 % processed samples
 xn1 = 0; % x[n-1]
@@ -88,6 +89,7 @@ figure();
 plot(out);
 hold on;
 plot(x);
+legend('resynth', 'target');
 
 sound(x, fs);
 pause(1);
