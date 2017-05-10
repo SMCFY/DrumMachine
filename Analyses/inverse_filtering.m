@@ -1,6 +1,6 @@
 %% Analyses (peak picking)
 
-[x fs] = audioread('56469__surfjira__tom2-hard.wav');
+[x fs] = audioread('tom_sample.wav');
 
 fftSize = 1024; % window size
 window = x(1:fftSize).*hann(fftSize); % hanning window of the attack
@@ -62,6 +62,8 @@ exc = exc - mean(exc);
 exc = exc / max(exc);
 exc  = [exc; zeros(length(x)-length(exc),1)];
 
+exc = ifft(fft(res).*fft(exc)); % excitation convolved with residual
+
 % processed samples
 xn1 = 0; % x[n-1]
 xn2 = 0; % x[n-2]
@@ -80,7 +82,6 @@ for i=1:length(freq)
 end
 
 out = out / max(out); % normalisation
-out = ifft(fft(res).*fft(out));
 
 
 figure();
