@@ -4,7 +4,7 @@
 
 fftSize = 1024; % window size
 window = x(1:fftSize).*hann(fftSize); % hanning window of the attack
-window = [window; zeros(fftSize,1)]; % zero padded signal
+window = [window; zeros(2^13,1)]; % zero padded signal (higher DFT resolution)
 Xmag = abs(fft(window)); % magnitude spectrum
 
 w = [0:length(window)-1].*fs/length(window); %frequency in Hertz
@@ -14,18 +14,18 @@ subplot(2,1,1);
 plot(window(1:fftSize)); % time domain
 title('windowed signal');
 subplot(2,1,2);
-plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2))); % spectrum in dBs
+plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2)), '.'); % spectrum in dBs
 title('magnitude spectrum');
 
 %% Filtering (cascade of 2nd order IIR notch filters)
-freq = [193 366 495 646 796]; % estimated peak frequencies in Hz
+freq = [215 366 495 667 796 1120]; % estimated peak frequencies in Hz
 for i=1:length(freq)
     theta(i) = 2*pi*freq(1,i)/fs; % peak frequencies in radians/sample
 end
-bw = [20 50 50 50 50]; % peak bandwidth estimates in Hz
+bw = [50 60 60 40 60 40]; % peak bandwidth estimates in Hz
 res = x;
         
-r = 0.95; % zero/ploe factor
+r = 0.98; % pole radius
 
 figure();
 subplot(2,1,1);
