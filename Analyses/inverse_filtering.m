@@ -1,9 +1,9 @@
 %% Analyses (peak picking)
 
-[x fs] = audioread('snare_sample.wav');
+[x fs] = audioread('/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Samples/Tom_big/tom_big_vig1.wav');
 
 fftSize = 1024; % window size
-window = x(1:fftSize).*hann(fftSize); % hanning window of the attack
+window = x(750:fftSize+750-1).*hann(fftSize); % hanning window of the attack
 window = [window; zeros(2^13,1)]; % zero padded signal (higher DFT resolution)
 Xmag = abs(fft(window)); % magnitude spectrum
 
