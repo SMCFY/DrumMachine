@@ -1,6 +1,6 @@
 %% Analyses (peak picking)
 
-[x fs] = audioread('/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Samples/Tom_big/tom_big_vig1.wav');
+[x fs] = audioread('/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Cropped_Samples/Tom_big/tom_big_pos1.aif');
 
 fftSize = 1024; % window size
 window = x(750:fftSize+750-1).*hann(fftSize); % hanning window of the attack
@@ -9,20 +9,20 @@ Xmag = abs(fft(window)); % magnitude spectrum
 
 w = [0:length(window)-1].*fs/length(window); %frequency in Hertz
 
-figure();
+%figure();
 subplot(2,1,1);
 plot(window(1:fftSize)); % time domain
 title('windowed signal');
 subplot(2,1,2);
-plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2)), '.'); % spectrum in dBs
+plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2))); % spectrum in dBs
 title('magnitude spectrum');
-
+hold on;
 %% Filtering (cascade of 2nd order IIR notch filters)
-freq = [215 366 495 667 796 1120]; % estimated peak frequencies in Hz
+freq = [115 215 305 446 508 607 712 816 1027 1139 1321]; % estimated peak frequencies in Hz
 for i=1:length(freq)
     theta(i) = 2*pi*freq(1,i)/fs; % peak frequencies in radians/sample
 end
-bw = [50 60 60 40 60 40]; % peak bandwidth estimates in Hz
+bw = [19 14 17 18 16 20 17 20 17 15 17]; % peak bandwidth estimates in Hz
 res = x;
         
 r = 0.98; % pole radius
