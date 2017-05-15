@@ -1,10 +1,12 @@
-% Analyses of position 1(middle) samples, and extraction of frequency and
-% bandwidth of modes for each instrument's attack
+% Analyses of mode distribution in the attack portion of recorded samples
+filepath = '/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Samples/';
+[x1 fs] = audioread([filepath, 'Tom_big/tom_big_pos1.aif']);
+x2 = audioread([filepath, 'Snare/snare_pos1.aif']);
+x3 = audioread([filepath, 'Cymbal/cymbal_pos1.wav']);
+x4 = audioread([filepath, 'Kick_ass/kick_pos1.wav']);
 
-[x fs] = audioread('/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Cropped_Samples/Tom_big/tom_big_pos1.aif');
-
-fftSize = 2048; % window size
-window = x(1:fftSize); % rectangular window of the attack
+fftSize = 1024; % window size
+window = x2(length(x2)-fftSize:length(x2)); % rectangular window of the attack
 window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
 Xmag = abs(fft(window)); % magnitude spectrum
 
@@ -18,7 +20,8 @@ plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2)), '.'); % db spectrum
 title('magnitude spectrum');
 
 %% results
-tom_big = [115, 19;   % estimated mode frequencies and bandwidths in Hertz
+% estimated mode frequencies and bandwidths in Hertz
+tom_big = [115, 19;
            215, 14;
            305, 17;
            446, 18;
@@ -32,3 +35,5 @@ tom_big = [115, 19;   % estimated mode frequencies and bandwidths in Hertz
 snare = [0, 0];
 cymbal = [0, 0];
 cardboard = [0, 0];
+
+modes = struct('tom', tom_big, 'snare', snare, 'cymbal', cymbal, 'kick', cardboard);
