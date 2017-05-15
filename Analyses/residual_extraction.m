@@ -34,4 +34,5 @@ subplot(2,1,2);
 plot(w(1:length(w)/2), 20*log10(resMag(1:length(resMag)/2)));
 title('residual spectrum');
 
+tom_res = tom_res/max(tom_res);
 sound(tom_res, fs)
