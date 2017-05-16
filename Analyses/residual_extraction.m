@@ -1,7 +1,7 @@
 % residual extraction by inverse filtering, based on mode analyses
-excLength = 2^10; % excitation length
+excLength = 2^16; % excitation length
 
-[tom_x fs] = audioread('/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Cropped_Samples/Tom_big/tom_big_pos1.aif');
+[tom_x fs] = audioread('/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Samples/Tom_big/tom_big_pos1.aif');
 tom_res = tom_x(1:excLength);
 
 % mode matrices

@@ -6,7 +6,7 @@ x3 = audioread([filepath, 'Cymbal/cymbal_pos1.wav']);
 x4 = audioread([filepath, 'Kick_ass/kick_pos1.wav']);
 
 fftSize = 1024; % window size
-window = x2(length(x2)-fftSize:length(x2)); % rectangular window of the attack
+window = x2(1:fftSize).*hanning(fftSize); % rectangular window of the attack
 window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
 Xmag = abs(fft(window)); % magnitude spectrum
 
@@ -19,6 +19,7 @@ subplot(2,1,2);
 plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2)), '.'); % db spectrum
 title('magnitude spectrum');
 
+%peakLoc = 20*log10(Xmag(1:length(Xmag)/2));
 %% results
 % estimated mode frequencies and bandwidths in Hertz
 tom_big = [115, 19;
