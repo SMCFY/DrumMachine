@@ -1,38 +1,48 @@
 % residual extraction by inverse filtering, based on mode analyses
 excLength = 2^10; % excitation length
 
-[tom_x fs] = audioread('/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Samples/Tom_big/tom_big_pos1.aif');
-tom_res = tom_x(1:excLength);
+filepath = '/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/RecordingSess/Samples/';
+[x1 fs] = audioread([filepath, 'Tom_big/tom_big_pos1.aif']); %tom
+x2 = audioread([filepath, 'Snare/snare_pos1.aif']); %snare
+x3 = audioread([filepath, 'Cymbal/cymbal_pos1.wav']); %cymbal
+x4 = audioread([filepath, 'Kick_ass/kick_pos1.wav']); %kick
+
+res = x2...% <------------------------------ change input here
+    (1:excLength); 
 
 % mode matrices
-modes = load('modes.mat');
-tom_big = modes.tom_big;
-%snare = modes.snare;
+load('modes.mat');
+tom = modes.tom;
+snare = modes.snare;
+cymbal = modes.cymbal;
+kick = modes.kick;
 
-for i=1:length(tom_big)
-    tom_big(i,1) = 2*pi*tom_big(i,1)/fs; % mode frequencies in radians/sample
-    %snare(i,1) = 2*pi*snare(i,1)/fs; % mode frequencies in radians/sample
+for i=1:length(tom) % mode frequencies in radians/sample
+    tom(i,1) = 2*pi*tom(i,1)/fs;
+    snare(i,1) = 2*pi*snare(i,1)/fs;
+    %cymbal(i,1) = 2*pi*cymbal(i,1)/fs;
+    %kick(i,1) = 2*pi*kick(i,1)/fs;
 end
-
-R= 0.98;
+%%
+%R= 0.98;
 subplot(2,1,1);
-for i=1:length(tom_big)
+for i=1:length(snare)
         
-    %R = exp(-pi*tom_big(i,2)/fs);% pole radius
-    b = [1 -2*cos(tom_big(i,1)) 1];        
-    a = [1 -2*R*cos(tom_big(i,1)) R*R];    
+    R = exp(-pi*snare(i,2)/fs); % pole radius (calculated from bw)
+    b = [1 -2*cos(snare(i,1)) 1];        
+    a = [1 -2*R*cos(snare(i,1)) R*R];    
         
-    tom_res = filter(b,a,tom_res); % apply inverse filter to get residual
+    res = filter(b,a,res); % apply inverse filter to get residual
     freqz(b,a); hold on;
 end
 title('cascaded notch filters');
 
-resMag = abs(fft(tom_res)); % magnitude spectrum of the residual  
+resMag = abs(fft(res)); % magnitude spectrum of the residual  
 w = [0:excLength-1].*fs/excLength; %frequency in Hertz
 
 subplot(2,1,2);
 plot(w(1:length(w)/2), 20*log10(resMag(1:length(resMag)/2)));
 title('residual spectrum');
 
-tom_res = tom_res/max(tom_res);
-sound(tom_res, fs)
+res = res/max(res);
+sound(res, fs)

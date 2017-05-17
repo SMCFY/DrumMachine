@@ -6,7 +6,7 @@ x3 = audioread([filepath, 'Cymbal/cymbal_pos1.wav']);
 x4 = audioread([filepath, 'Kick_ass/kick_pos1.wav']);
 
 fftSize = 1024; % window size
-window = x2(1:fftSize).*hanning(fftSize); % rectangular window of the attack
+window = x2(1:fftSize).*hamming(fftSize); % hamming window of the attack
 window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
 Xmag = abs(fft(window)); % magnitude spectrum
 
@@ -16,7 +16,7 @@ subplot(2,1,1);
 plot(window(1:fftSize)); % time domain
 title('windowed signal');
 subplot(2,1,2);
-plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2)), '.'); % db spectrum
+plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2))); % db spectrum
 title('magnitude spectrum');
 
 %peakLoc = 20*log10(Xmag(1:length(Xmag)/2));
@@ -33,7 +33,17 @@ tom_big = [115, 19;
            1027, 17;
            1139, 15;
            1321, 17]; 
-snare = [0, 0];
+snare = [194, 38;
+         346, 59;
+         475, 60;
+         716, 75;
+         1291, 53;
+         1472, 62;
+         1870, 58;
+         2842, 45;
+         3462, 56;
+         0, 0;
+         0, 0];
 cymbal = [0, 0];
 cardboard = [0, 0];
 
