@@ -8,6 +8,8 @@ classdef impactSynth < audioPlugin
         dimension = 1;
         material = 1;
 
+        instrument = 1; % instrument ID
+
         %===================================
     end
     
@@ -19,7 +21,7 @@ classdef impactSynth < audioPlugin
         % vst parameters
         fs; % sampling rate
         buff; % buffer for generated waveform
-        readIndex = 1; % reading position in buffer
+        readIndex = [1, 1, 1, 1]; % reading position in buffers
         noteState = 'noteOff'; % note state
         soundOut = 'false'; % decides whether to output the signal or not
 
