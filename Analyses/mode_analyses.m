@@ -5,9 +5,10 @@ x2 = audioread([filepath, 'Snare/snare_pos1.aif']);
 x3 = audioread([filepath, 'Cymbal/cymbal_pos1.wav']);
 x4 = audioread([filepath, 'Kick_ass/kick_pos1.wav']);
 
-fftSize = 1024; % window size
-window = x2(1:fftSize).*hamming(fftSize); % hamming window of the attack
-window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
+fftSize = length(x4); % window size
+window = x3... %<------------------------ change input here
+    (1:fftSize).*hamming(fftSize); % hamming window of the attack
+%window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
 Xmag = abs(fft(window)); % magnitude spectrum
 
 w = [0:length(window)-1].*fs/length(window); %frequency in Hertz
@@ -44,7 +45,9 @@ snare = [194, 38;
          3462, 56;
          0, 0;
          0, 0];
-cymbal = [0, 0];
+cymbal = [702, 72;
+          877, 63;
+          2602];
 cardboard = [0, 0];
 
 modes = struct('tom', tom_big, 'snare', snare, 'cymbal', cymbal, 'kick', cardboard);
