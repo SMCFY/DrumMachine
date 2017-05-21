@@ -1,4 +1,4 @@
-function out = f_bdwg( freqs, decay, low_high, Tsamp, fs)
+function out = f_bdwg( freqs, B, decay, Tsamp, fs, low_high, res )
 % Banded digital waveguide function
 
 %% variables
@@ -14,8 +14,9 @@ end
 %% initialization
 
 L = rand(n_modes, max(d)); % initialize delay lines with white noise
-% res = res(1:max(d));
-% L = [res'; res'; res'; res'; res'];
+%L = zeros(n_modes, max(d));
+%res = res(1:max(d));
+%L = [res'; res'; res'; res'; res'; res'; res'; res'; res'; res'; res'];
 
 % m1=mean(L(1,:)); m2=mean(L(2,:)); m3=mean(L(3,:));
 % L(1,:) = L(1,:) - m1; % centerize
@@ -23,6 +24,8 @@ L = rand(n_modes, max(d)); % initialize delay lines with white noise
 % L(3,:) = L(3,:) - m3; % centerize
 
 out = zeros(1, Tsamp); % output
+
+%res = [res' zeros(1,length(out)-length(res))];
 
 p_out = 3*ones(1,n_modes); % pointers out      (see shift register)
 p_out1 = 2*ones(1,n_modes);
@@ -43,8 +46,9 @@ p_in2 = 4*ones(1,n_modes);
 
 %% bandpass according to paper (following Steiglitz's DSP book, 1996)
 
-f_low_high = low_high*freqs;
-B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
+% f_low_high = low_high*freqs;
+% B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
+B = B';
 B_rad = 2*pi/fs .* B; % bandwidth in radians/samp
 psi = 2*pi/fs * freqs; % center frequencies in radians/samp
 R = 1 - B_rad/2;
@@ -74,6 +78,8 @@ for i=1:Tsamp
         % bandpass filter y[n] = b1*x[n] + b2*x[n-1] + b3*x[n-2] - a2*y[n-1] - a3*y[n-2]
         L(j, p_out(j)) = decay(j) * (b(j,1)*L(j, p_in(j)) + ...                               % b(j,2)*L(j, p_in1(j))... (=0)
             + b(j,3)*L(j, p_in2(j)) - a(j,2)*L(j, p_out1(j)) - a(j,3)*L(j, p_out2(j)));
+        
+        
         
         % update and wrap pointers
         if (p_in(j)==d(j))
