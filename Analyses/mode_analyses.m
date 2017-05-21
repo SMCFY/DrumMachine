@@ -27,4 +27,4 @@ snare = [194, 346, 475, 716, 1291, 1472, 1870, 2842, 3462, 4125, 4634, 4945];
 cymbal = [695, 874, 1015, 2601, 2739, 3712, 4876, 5548, 5768, 6145, 6593, 7428];
 cardboard = [47, 200, 315, 561, 643, 748, 950, 1296, 1445, 2082, 2258, 2468];
 
-modes = struct('tom', tom_big, 'snare', snare, 'cymbal', cymbal, 'kick', cardboard);
+modes_invFilt = struct('tom', tom_big, 'snare', snare, 'cymbal', cymbal, 'kick', cardboard);

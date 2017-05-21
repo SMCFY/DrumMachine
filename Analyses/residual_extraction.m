@@ -11,11 +11,11 @@ res = x4...% <------------------------------ change input here
     (1:excLength); 
 
 % mode matrices
-load('modes.mat');
-tom = modes.tom;
-snare = modes.snare;
-cymbal = modes.cymbal;
-kick = modes.kick;
+load('modes_invFilt.mat');
+tom = modes_invFilt.tom;
+snare = modes_invFilt.snare;
+cymbal = modes_invFilt.cymbal;
+kick = modes_invFilt.kick;
 
 for i=1:length(tom) % mode frequencies in radians/sample
     tom(1,i) = 2*pi*tom(1,i)/fs;
