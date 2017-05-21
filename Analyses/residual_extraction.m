@@ -7,7 +7,7 @@ x2 = audioread([filepath, 'Snare/snare_pos1.aif']); %snare
 x3 = audioread([filepath, 'Cymbal/cymbal_pos1.wav']); %cymbal
 x4 = audioread([filepath, 'Kick_ass/kick_pos1.wav']); %kick
 
-res = x2...% <------------------------------ change input here
+res = x4...% <------------------------------ change input here
     (1:excLength); 
 
 % mode matrices
@@ -18,19 +18,19 @@ cymbal = modes.cymbal;
 kick = modes.kick;
 
 for i=1:length(tom) % mode frequencies in radians/sample
-    tom(i,1) = 2*pi*tom(i,1)/fs;
-    snare(i,1) = 2*pi*snare(i,1)/fs;
-    %cymbal(i,1) = 2*pi*cymbal(i,1)/fs;
-    %kick(i,1) = 2*pi*kick(i,1)/fs;
+    tom(1,i) = 2*pi*tom(1,i)/fs;
+    snare(1,i) = 2*pi*snare(1,i)/fs;
+    cymbal(1,i) = 2*pi*cymbal(1,i)/fs;
+    kick(1,i) = 2*pi*kick(1,i)/fs;
 end
 %%
-%R= 0.98;
+R= 0.98;
 subplot(2,1,1);
-for i=1:length(snare)
+for i=1:length(tom)
         
-    R = exp(-pi*snare(i,2)/fs); % pole radius (calculated from bw)
-    b = [1 -2*cos(snare(i,1)) 1];        
-    a = [1 -2*R*cos(snare(i,1)) R*R];    
+    %R = exp(-pi*snare(i,2)/fs); % pole radius (calculated from bw)
+    b = [1 -2*cos(kick(1,i)) 1];        
+    a = [1 -2*R*cos(kick(1,i)) R*R];    
         
     res = filter(b,a,res); % apply inverse filter to get residual
     freqz(b,a); hold on;

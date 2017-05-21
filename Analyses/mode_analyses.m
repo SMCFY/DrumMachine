@@ -6,7 +6,7 @@ x3 = audioread([filepath, 'Cymbal/cymbal_pos1.wav']);
 x4 = audioread([filepath, 'Kick_ass/kick_pos1.wav']);
 
 fftSize = 1024; % window size
-window = x2(1:fftSize).*hamming(fftSize); % hamming window of the attack
+window = x1(1:fftSize).*hamming(fftSize); % hamming window of the attack
 window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
 Xmag = abs(fft(window)); % magnitude spectrum
 
@@ -21,30 +21,10 @@ title('magnitude spectrum');
 
 %peakLoc = 20*log10(Xmag(1:length(Xmag)/2));
 %% results
-% estimated mode frequencies and bandwidths in Hertz
-tom_big = [115, 19;
-           215, 14;
-           305, 17;
-           446, 18;
-           508, 16;
-           607, 20;
-           712, 17;
-           816, 20;
-           1027, 17;
-           1139, 15;
-           1321, 17]; 
-snare = [194, 38;
-         346, 59;
-         475, 60;
-         716, 75;
-         1291, 53;
-         1472, 62;
-         1870, 58;
-         2842, 45;
-         3462, 56;
-         0, 0;
-         0, 0];
-cymbal = [0, 0];
-cardboard = [0, 0];
+% estimated mode frequencies in Hertz
+tom_big = [115, 215, 305, 446, 508, 607, 712, 816, 1027, 1139, 1321, 1896]; 
+snare = [194, 346, 475, 716, 1291, 1472, 1870, 2842, 3462, 4125, 4634, 4945];
+cymbal = [695, 874, 1015, 2601, 2739, 3712, 4876, 5548, 5768, 6145, 6593, 7428];
+cardboard = [47, 200, 315, 561, 643, 748, 950, 1296, 1445, 2082, 2258, 2468];
 
 modes = struct('tom', tom_big, 'snare', snare, 'cymbal', cymbal, 'kick', cardboard);
