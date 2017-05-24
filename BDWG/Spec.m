@@ -1,7 +1,7 @@
 function [pxx, f] = Spec( x, fs)
 
 %x = x(t:t+1024);
-[pxx,f] = pwelch(x(100:end),[],[],2*fs,fs);
+[pxx,f] = pwelch(x,[],[],2*fs,fs);
 figure
 %plot(f(1:fmax), 10*log10(pxx(1:fmax)), 'r') %*fs/2
 plot(f, 10*log10(pxx), 'r')

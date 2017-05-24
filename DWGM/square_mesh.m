@@ -9,7 +9,7 @@ fs = 44100; % sampling frequency
 Tsec = 1; % duration of simulation (Seconds)
 Tsamp = Tsec*fs; % duration of simulation (Samples)
 
-NJ = 12; % number of junctions
+NJ = 6; % number of junctions
 
 % initialize calculation matrices
 
@@ -32,8 +32,8 @@ y = zeros(1, Tsamp); % output
 % reflexion
 
 r_coeff = -1; % reflexion coefficient (-1 for perfect inverse phase reflection)
-decayFactor = 0.999; 
-a = -0.09;
+decayFactor = 0.09; 
+a = -0.009;
 b = 1 - abs(a);
 
 % b = [0.5 0.5];
@@ -44,8 +44,8 @@ b = 1 - abs(a);
 
 % excitation position and size
 
-excite_size = round(NJ/5); % excitation size
-excite_pos = round(NJ/2); % excitation centrale position (gravity center of the strike)
+excite_size = ceil(NJ/5); % excitation size
+excite_pos = ceil(NJ/2); % excitation centrale position (gravity center of the strike)
 % exite_pos = round((NJ-exite_size)/2); % center position (middle-10%)
 
 % excitation shape and velocity
