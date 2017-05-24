@@ -2,13 +2,13 @@ classdef impactSynth < audioPlugin
     % audio plugin for producing bubble sounds
 
     properties
-        %=================================== interfaced parameters
+        % interfaced parameters
         strikePos = 1;
         strikeVig = 1;
         dimension = 1;
         material = 1;
 
-        %===================================
+        instID = 1; % instrument ID
     end
     
     properties (Dependent)
@@ -18,48 +18,62 @@ classdef impactSynth < audioPlugin
     properties (Access = private)
         % vst parameters
         fs; % sampling rate
+        
         buff; % buffer for generated waveform
-        readIndex = 1; % reading position in buffer
-        noteState = 'noteOff'; % note state
-        soundOut = 'false'; % decides whether to output the signal or not
+        t = 4; % buffer length in seconds
+        N; % buffer in samples
+        readIndex = [1; 1; 1; 1]; % reading position in buffers
+        soundOut = [0; 0; 0; 0]; % state variable decides whether to output the signal from the buffer or not
+
+        frameBuff; % buffer for output frame
+        maxFrameSize; % maximum frame size in samples
+
+        noteState = 'noteOff'; % trig
 
         %=================================== synth parameters
-        modes = [];
+        modes = [180, 400, 600, 1250];
         %===================================
     end
     
     properties (Constant)
        PluginInterface = audioPluginInterface(...
-           audioPluginParameter('strikePos','DisplayName','Radius','Mapping',{'lin',0,1}),...
-           audioPluginParameter('strikeVigor','DisplayName','Radius','Mapping',{'lin',0,1}),...
-           audioPluginParameter('dimension','DisplayName','Radius','Mapping',{'lin',0,1}),...
-           audioPluginParameter('material','DisplayName','Radius','Mapping',{'lin',0,1}),...
+           audioPluginParameter('strikePos','DisplayName','StrikePosition','Mapping',{'lin',0,1}),...
+           audioPluginParameter('strikeVig','DisplayName','StrikeVigor','Mapping',{'lin',0,1}),...
+           audioPluginParameter('dimension','DisplayName','Dimension','Mapping',{'lin',0,1}),...
+           audioPluginParameter('material','DisplayName','Material','Mapping',{'lin',0,1}),...
+           audioPluginParameter('instID','DisplayName','ID','Mapping',{'int',1,4}),...
            audioPluginParameter('trig','DisplayName','Trigger','Mapping',{'enum','noteOff','noteOn_'}),...
            'InputChannels',1,'OutputChannels',1);      
     end
 %--------------------------------------------------------------------------
     methods
         function obj = impactSynth() % constructor
-            obj.fs = (getSampleRate(obj));
-            obj.N =(0:1/obj.fs:0.5);
-            obj.buff = zeros(length(obj.N),1);
+            obj.fs = getSampleRate(obj);
+            obj.maxFrameSize = 16384; % 2^14
+            obj.N = (0:1/obj.fs:obj.t); % number of samples length in seconds
+            obj.buff = [zeros(1,length(obj.N));
+                        zeros(1,length(obj.N));
+                        zeros(1,length(obj.N));
+                        zeros(1,length(obj.N))];
+            obj.frameBuff = zeros(1,obj.maxFrameSize);
         end                                   
         
         function reset(obj)
-            obj.fs = (getSampleRate(obj));
-            obj.readIndex = 1;
-            obj.soundOut = 'false';
+            obj.readIndex = [1; 1; 1; 1];
+            obj.soundOut = [0; 0; 0; 0];
         end 
         
         function set.trig(obj, val)
             if val == 'noteOn_'
-                obj.readIndex = 1; % init readIndex 
-                obj.soundOut = 'true_';
+                obj.readIndex(obj.instID) = 1; % init readIndex of respective buffer
+                obj.soundOut(obj.instID) = 1; % trigger sound according to instrument ID
 
                 %=================================== sound synthesis
-                obj.buff = bands(in)+mesh(in)'; % synthesis
+                obj.buff(obj.instID,:) = bands(obj.modes(obj.instID), obj.N)'; % synthesis
                 %===================================
+
             end
+
             obj.noteState = val;
         end 
         
@@ -69,19 +83,28 @@ classdef impactSynth < audioPlugin
         
         function out = process(obj, in) 
 
-             if obj.soundOut == 'true_' 
-                 if obj.readIndex < length(obj.buff)-length(in) % buffer length not exceeded - output sound
-                     out = obj.buff(obj.readIndex:length(in)+obj.readIndex-1); % read from buffer      
-                     obj.readIndex = obj.readIndex + length(in); % increment readIndex
-                 else % buffer length exceeded - output zeros
-                     obj.readIndex = 1; % init readIndex
-                     obj.soundOut = 'false';
-                     out = zeros(length(in),1);
-                 end
-             else
-                 out = zeros(length(in),1);
-                
-             end
+            obj.frameBuff = zeros(1,length(obj.frameBuff)); % init frame buffer
+
+            for i=1:length(obj.buff(:,1)) % iteration through instruments
+                if obj.readIndex(i) < length(obj.buff(i,:)) - length(in) % buffer length not exceeded(&& soundOut == 1) - add signal
+                    
+                    obj.frameBuff(1:length(in)) = obj.frameBuff(1:length(in))...
+                    + obj.buff(i,obj.readIndex(i):obj.readIndex(i)+(length(in)-1))... % read from synth buffer, write to frame buffer
+                    * obj.soundOut(i); % applying state variable
+
+                    obj.readIndex(i) = obj.readIndex(i) + length(in); % increment readIndex
+
+                else % buffer length exceeded - add zeros
+
+                    obj.readIndex(i) = 1; % init readIndex
+                    obj.soundOut(i) = 0;
+
+                    obj.frameBuff(1:length(in)) = obj.frameBuff(1:length(in)) + zeros(1,length(in));
+                end
+            end    
+
+                out = obj.frameBuff(1:length(in))'; % output
+
         end  
     end
 %--------------------------------------------------------------------------
@@ -107,10 +130,10 @@ classdef impactSynth < audioPlugin
 end
 %--------------------------------------------------------------------------
 %=================================== synth functions
-function out = bands(in)
-    out = in; 
+function out = bands(freq, time)
+    out = sin(2*pi*freq*time); 
 end
-function out = mesh(in)
-    out = in; 
+function out = mesh(freq, time)
+    out = sin(2*pi*freq*time); 
 end
 %===================================
