@@ -31,7 +31,16 @@ classdef impactSynth < audioPlugin
         noteState = 'noteOff'; % trig
 
         %=================================== synth parameters
-        modes = [180, 400, 600, 1250];
+        modes = [112, 203, 259, 279, 300, 332, 345, 375, 398, 407, 450, 473, 488, 488, 547, 596,...
+                 625, 653, 679, 692, 705, 760, 773, 806, 852, 899, 924, 975, 998, 1019, 1046, 1109,...
+                 1134, 1164, 1192, 1226, 1309, 1358, 1379, 1411, 1461, 1532, 1610, 1683, 1758, 1880,...
+                 2027, 2131, 2271, 2515, 2731, 2809, 2922, 3224, 4694, 5563, 6655, 7072];
+
+        pitchRange = 100; % pitch range mapped to dimension 
+        lpfPole = 0.5; % lowpass filter pole radius - loss filter damping
+        excGain = 0.5; % gain coefficient for the excitation
+        strikeGain; % gain coefficient for each mode
+        m = 0; % slope of transfer fuction
         %===================================
     end
     
@@ -56,6 +65,7 @@ classdef impactSynth < audioPlugin
                         zeros(1,length(obj.N));
                         zeros(1,length(obj.N))];
             obj.frameBuff = zeros(1,obj.maxFrameSize);
+            obj.strikeGain = ones(1,length(obj.modes(1,:)));
         end                                   
         
         function reset(obj)
@@ -69,7 +79,15 @@ classdef impactSynth < audioPlugin
                 obj.soundOut(obj.instID) = 1; % trigger sound according to instrument ID
 
                 %=================================== sound synthesis
-                obj.buff(obj.instID,:) = bands(obj.modes(obj.instID), obj.N)'; % synthesis
+                
+                obj.modes = obj.modes + (obj.dimension-0.5) * obj.pitchRange; % dimension
+                obj.lpfPole = abs(obj.material-0.001); % material
+                obj.excGain = obj.strikeVig; % strike vigor
+
+                obj.m = (obj.strikePos - obj.strikeGain(1)) / (length(obj.strikeGain)-1);
+                obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + 1 - obj.m; % (y=mx+b) strike postion
+                
+                obj.buff(obj.instID,:) = bands(obj.modes(1,obj.instID), obj.N)'; % synthesis
                 %===================================
 
             end
@@ -103,7 +121,7 @@ classdef impactSynth < audioPlugin
                 end
             end    
 
-                out = obj.frameBuff(1:length(in))'; % output
+                out = (obj.frameBuff(1:length(in)) / max(obj.frameBuff(1:length(in))))'; % normalized output
 
         end  
     end
