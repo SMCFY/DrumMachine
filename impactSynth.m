@@ -20,7 +20,7 @@ classdef impactSynth < audioPlugin
         fs; % sampling rate
         
         buff; % buffer for generated waveform
-        t = 0.5; % buffer length in seconds
+        t = 4; % buffer length in seconds
         N; % buffer in samples
         readIndex = [1; 1; 1; 1]; % reading position in buffers
         soundOut = [0; 0; 0; 0]; % state variable decides whether to output the signal from the buffer or not
@@ -37,7 +37,7 @@ classdef impactSynth < audioPlugin
     
     properties (Constant)
        PluginInterface = audioPluginInterface(...
-           audioPluginParameter('strikePos','DisplayName','StrikingPosition','Mapping',{'lin',0,1}),...
+           audioPluginParameter('strikePos','DisplayName','StrikePosition','Mapping',{'lin',0,1}),...
            audioPluginParameter('strikeVig','DisplayName','StrikeVigor','Mapping',{'lin',0,1}),...
            audioPluginParameter('dimension','DisplayName','Dimension','Mapping',{'lin',0,1}),...
            audioPluginParameter('material','DisplayName','Material','Mapping',{'lin',0,1}),...
@@ -59,8 +59,6 @@ classdef impactSynth < audioPlugin
         end                                   
         
         function reset(obj)
-            obj.fs = (getSampleRate(obj));
-            obj.maxFrameSize = 16384;
             obj.readIndex = [1; 1; 1; 1];
             obj.soundOut = [0; 0; 0; 0];
         end 
@@ -84,20 +82,19 @@ classdef impactSynth < audioPlugin
         end 
         
         function out = process(obj, in) 
-            %if length(in) ~= obj.frameSize
-            %    obj.frameSize = length(in);
-            %end
-            obj.frameBuff = zeros(1,length(obj.frameBuff));
 
-            for i=1:length(obj.soundOut)    
-                if obj.readIndex(i) < length(obj.buff(i,:)) - length(in) % buffer length not exceeded - output sound
+            obj.frameBuff = zeros(1,length(obj.frameBuff)); % init frame buffer
+
+            for i=1:length(obj.buff(:,1)) % iteration through instruments
+                if obj.readIndex(i) < length(obj.buff(i,:)) - length(in) % buffer length not exceeded(&& soundOut == 1) - add signal
                     
-                    obj.frameBuff(1:length(in)) = obj.frameBuff(1:length(in)) + obj.buff(i,obj.readIndex(i):obj.readIndex(i)+(length(in)-1))... % read from synth buffer and add it to the frame buffer
+                    obj.frameBuff(1:length(in)) = obj.frameBuff(1:length(in))...
+                    + obj.buff(i,obj.readIndex(i):obj.readIndex(i)+(length(in)-1))... % read from synth buffer, write to frame buffer
                     * obj.soundOut(i); % applying state variable
 
                     obj.readIndex(i) = obj.readIndex(i) + length(in); % increment readIndex
 
-                else % buffer length exceeded - output zeros
+                else % buffer length exceeded - add zeros
 
                     obj.readIndex(i) = 1; % init readIndex
                     obj.soundOut(i) = 0;
