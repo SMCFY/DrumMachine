@@ -39,8 +39,6 @@ p_in2 = 4*ones(1,n_modes);
 
 %% bandpass according to paper (following Steiglitz's DSP book, 1996)
 
-w_low = 0.999; % 75% below f0
-w_high = 1.001; % 125% upper f0
 f_low_high = low_high*freqs;
 B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
 % B = B';
