@@ -83,10 +83,9 @@ classdef impactSynth < audioPlugin
                 obj.modes = obj.modes + (obj.dimension-0.5) * obj.pitchRange; % dimension
                 obj.lpfPole = abs(obj.material-0.001); % material
                 obj.excGain = obj.strikeVig; % strike vigor
-
-                obj.m = (obj.strikePos - obj.strikeGain(1)) / (length(obj.strikeGain)-1);
-                obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + 1 - obj.m; % (y=mx+b) strike postion
-                
+                obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.strikePos) / (length(obj.strikeGain)-1);
+                obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b) strike postion
+                disp(obj.strikeGain);
                 obj.buff(obj.instID,:) = bands(obj.modes(1,obj.instID), obj.N)'; % synthesis
                 %===================================
 
