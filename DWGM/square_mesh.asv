@@ -33,7 +33,7 @@ y = zeros(1, Tsamp); % output
 
 r_coeff = -1; % reflexion coefficient (-1 for perfect inverse phase reflection)
 decayFactor = 0.9999; 
-a = -0.9;
+a = -0.15;
 b = 1 - abs(a);
 
 % b = [0.5 0.5];
@@ -119,22 +119,22 @@ plot(y)
 %[res, fsres]=audioread('snare_sample_residual.wav');
 
 %% 
-y = y';
-fftSize = 1024; % window size
-startfft = 1;
-window = y(startfft:end).*hamming(length(y(startfft:end))); % hamming window of the attack
-window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
-Xmag = abs(fft(window)); % magnitude spectrum
-
-w = [0:length(window)-1].*fs/length(window); %frequency in Hertz
-
-figure
-% subplot(2,1,1);
-% plot(window); % time domain
-% title('windowed signal');
-% subplot(2,1,2);
-plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2))); % db spectrum
-title('magnitude spectrum');
+% y = y';
+% fftSize = 1024; % window size
+% startfft = 1;
+% window = y2(startfft:end)'.*hamming(length(y2(startfft:end))); % hamming window of the attack
+% window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
+% Xmag = abs(fft(window)); % magnitude spectrum
+% 
+% w = [0:length(window)-1].*fs/length(window); %frequency in Hertz
+% 
+% figure
+% % subplot(2,1,1);
+% % plot(window); % time domain
+% % title('windowed signal');
+% % subplot(2,1,2);
+% plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2))); % db spectrum
+% title('magnitude spectrum');
 
 
 

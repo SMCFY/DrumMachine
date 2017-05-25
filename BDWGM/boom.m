@@ -4,7 +4,7 @@
 
 [res, fs] = audioread('tom_res.wav'); % r = 0.98
 %[res2, fs] = audioread('tom_big_res_bw.wav'); % variable r, depending on bandwidth
-load('modes_10k.mat');
+%load('modes_10k.mat');
 tom = modes_10k.tom;
 [tomOriginal, fs] = audioread('tom_big_pos1.aif');
 tomOriginal = tomOriginal';
@@ -35,7 +35,7 @@ decayFactor = 0.999;
 freqs = tom(1,:); % fundamental frequency of delay lines (modes) (Hertz)
 B = tom(2,:)';
 decay = tom(3,:);
-damp = 0.9999;
+damp = 0.001;
 
 %decay = ones(1, length(decay)); 
 
@@ -50,6 +50,7 @@ y1 = y_bdwg;
 y2 = conv(y1, res);
 
 plot(tomOriginal/max(tomOriginal))
+%plot(y_bdwg)
 hold on
 plot(y2/max(y2))
 
