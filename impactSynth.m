@@ -92,7 +92,7 @@ classdef impactSynth < audioPlugin
 
                 %=================================== sound synthesis
                 
-                obj.lpfPole = abs(obj.material-0.001); % material
+                obj.lpfPole = abs(obj.material-0.0001); % material
                 obj.excGain = obj.strikeVig; % strike vigor
                 obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.strikePos) / (length(obj.strikeGain)-1);
                 obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b) strike postion
