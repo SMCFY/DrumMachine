@@ -45,7 +45,7 @@ classdef impactSynth < audioPlugin
         strikeGain; % gain coefficient for each mode
         m = 0; % slope of transfer fuction
         
-        resBank = [audioread('Analyses/tom_res.wav')'; 
+        resBank = [audioread('Analyses/tom_res.wav')'; % extracted residuals
                    audioread('Analyses/snare_res.wav')';
                    audioread('Analyses/cymbal_res.wav')';
                    audioread('Analyses/kick_res.wav')'];
@@ -77,7 +77,7 @@ classdef impactSynth < audioPlugin
             obj.resPadded = [obj.resBank(1,:), zeros(1, obj.fs*obj.t-length(obj.resBank(1,:)));
                              obj.resBank(2,:), zeros(1, obj.fs*obj.t-length(obj.resBank(2,:)));
                              obj.resBank(3,:), zeros(1, obj.fs*obj.t-length(obj.resBank(3,:)));
-                             obj.resBank(4,:), zeros(1, obj.fs*obj.t-length(obj.resBank(4,:)));]
+                             obj.resBank(4,:), zeros(1, obj.fs*obj.t-length(obj.resBank(4,:)));];
         end                                   
         
         function reset(obj)
@@ -99,7 +99,8 @@ classdef impactSynth < audioPlugin
                 
                 obj.buff(obj.instID,:) = f_bdwg(obj.modes(1:24)*obj.dimension, obj.decay(1:24), length(obj.buff(1,:)), obj.fs, [0.999; 1.001], 0.9, obj.strikeGain)'; % banded waveguide
                 % waveguide mesh
-                obj.buff(obj.instID,:) = ifft(fft(obj.buff(obj.instID,:)) .* fft(obj.resPadded(obj.instID,:))); % convolution with residual
+                obj.buff(obj.instID,:) = real(ifft(fft(obj.buff(obj.instID,:)) .* fft(obj.resPadded(obj.instID,:)))); % convolution with residual (multiplication of spectrums)
+                obj.buff(obj.instID,:) = obj.buff(obj.instID,:) / max(obj.buff(obj.instID,:)); % normalisation
                 %===================================
 
             end
@@ -158,9 +159,6 @@ classdef impactSynth < audioPlugin
 end
 %--------------------------------------------------------------------------
 %=================================== synth functions
-function out = bands(freq, time)
-    out = sin(2*pi*freq*time); 
-end
 
 function out = f_bdwg( freqs, decay, Tsamp, fs, low_high, damp, bandCoeff)
     % Banded digital waveguide function

@@ -38,12 +38,59 @@
 		"subpatcher_template" : "",
 		"boxes" : [ 			{
 				"box" : 				{
+					"bgmode" : 0,
+					"border" : 0,
+					"clickthrough" : 0,
+					"id" : "obj-1",
+					"linecount" : 2,
+					"maxclass" : "newobj",
+					"numinlets" : 2,
+					"numoutlets" : 8,
+					"offset" : [ 0.0, 0.0 ],
+					"outlettype" : [ "signal", "signal", "", "list", "int", "", "", "" ],
+					"patching_rect" : [ 51.0, 527.0, 378.0, 197.0 ],
+					"presentation_linecount" : 3,
+					"presentation_rect" : [ 0.0, 0.0, 300.0, 100.0 ],
+					"save" : [ "#N", "vst~", "loaduniqueid", 0, "/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/impactSynth.vst", ";" ],
+					"saved_object_attributes" : 					{
+						"parameter_enable" : 0
+					}
+,
+					"snapshot" : 					{
+						"filetype" : "C74Snapshot",
+						"version" : 1,
+						"name" : "impactSynth.vst",
+						"origin" : "impactSynth.vst",
+						"type" : "VST",
+						"subtype" : "AudioEffect",
+						"snapshot" : 						{
+							"pluginname" : "impactSynth.vst",
+							"plugindisplayname" : "impactSynth",
+							"pluginsavedname" : "/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/impactSynth.vst",
+							"pluginsaveduniqueid" : 0,
+							"version" : 1,
+							"isbank" : 0,
+							"isbase64" : 1,
+							"sliderorder" : [ 0, 1, 2, 3, 4, 5 ],
+							"slidervisibility" : [ 1, 1, 1, 1, 1, 1 ],
+							"blob" : "80.CMlaKA....fQ3MzZ....AzzUgAG....Y....F.....................................fOQM5Q+.H..7Cf..vOO3AO+.H........"
+						}
+
+					}
+,
+					"style" : "",
+					"text" : "vst~ /Users/geri/Documents/Uni/SMC8/P8/DrumMachine/impactSynth.vst",
+					"viewvisibility" : 1
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-91",
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 756.0, 51.25, 97.5, 20.0 ],
-					"presentation_rect" : [ 939.0, 61.25, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "instrument rack"
 				}
@@ -70,7 +117,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 859.0, 300.0, 29.5, 22.0 ],
-					"presentation_rect" : [ 1036.5, 654.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "1"
 				}
@@ -84,7 +130,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 819.5, 300.0, 34.0, 22.0 ],
-					"presentation_rect" : [ 1002.25, 653.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "0.66"
 				}
@@ -111,7 +156,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 779.0, 300.0, 34.0, 22.0 ],
-					"presentation_rect" : [ 943.0, 724.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "0.33"
 				}
@@ -151,7 +195,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 490.75, 386.0, 29.5, 22.0 ],
-					"presentation_rect" : [ 691.0, 345.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "0"
 				}
@@ -165,7 +208,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 367.0, 386.0, 29.5, 22.0 ],
-					"presentation_rect" : [ 567.0, 347.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "0"
 				}
@@ -179,7 +221,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 239.0, 386.0, 29.5, 22.0 ],
-					"presentation_rect" : [ 438.0, 348.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "0"
 				}
@@ -193,7 +234,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 84.5, 386.0, 29.5, 22.0 ],
-					"presentation_rect" : [ 286.0, 349.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "0"
 				}
@@ -207,7 +247,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 51.0, 386.0, 29.5, 22.0 ],
-					"presentation_rect" : [ 252.0, 344.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "1"
 				}
@@ -221,7 +260,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 51.0, 423.0, 34.0, 22.0 ],
-					"presentation_rect" : [ 252.0, 373.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "gate"
 				}
@@ -235,7 +273,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 203.0, 386.0, 29.5, 22.0 ],
-					"presentation_rect" : [ 402.0, 349.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "1"
 				}
@@ -249,7 +286,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 203.0, 423.0, 34.0, 22.0 ],
-					"presentation_rect" : [ 402.0, 378.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "gate"
 				}
@@ -263,7 +299,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 331.0, 386.0, 29.5, 22.0 ],
-					"presentation_rect" : [ 534.0, 347.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "1"
 				}
@@ -277,7 +312,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 331.0, 423.0, 34.0, 22.0 ],
-					"presentation_rect" : [ 534.0, 376.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "gate"
 				}
@@ -318,9 +352,8 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 455.0, 309.0, 101.0, 35.0 ],
-					"presentation_rect" : [ 653.0, 304.0, 0.0, 0.0 ],
 					"style" : "",
-					"text" : "Material 0.795276"
+					"text" : "Material 0.559055"
 				}
 
 			}
@@ -333,9 +366,8 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 331.0, 309.0, 115.0, 35.0 ],
-					"presentation_rect" : [ 535.0, 305.0, 0.0, 0.0 ],
 					"style" : "",
-					"text" : "Dimension 0.795276"
+					"text" : "Dimension 0.559055"
 				}
 
 			}
@@ -348,9 +380,8 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 203.0, 309.0, 116.0, 35.0 ],
-					"presentation_rect" : [ 402.0, 303.0, 0.0, 0.0 ],
 					"style" : "",
-					"text" : "StrikeVigor 0.795276"
+					"text" : "StrikeVigor 0.559055"
 				}
 
 			}
@@ -396,14 +427,13 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-31",
-					"linecount" : 2,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 51.0, 309.0, 141.0, 35.0 ],
+					"patching_rect" : [ 51.0, 309.0, 141.0, 22.0 ],
 					"style" : "",
-					"text" : "StrikingPosition 0.795276"
+					"text" : "StrikePosition 0.559055"
 				}
 
 			}
@@ -477,7 +507,7 @@
 					"maxclass" : "ezdac~",
 					"numinlets" : 2,
 					"numoutlets" : 0,
-					"patching_rect" : [ 51.0, 771.0, 106.0, 106.0 ],
+					"patching_rect" : [ 51.0, 753.0, 106.0, 106.0 ],
 					"style" : ""
 				}
 
@@ -504,57 +534,9 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 51.0, 270.25, 141.0, 22.0 ],
+					"patching_rect" : [ 51.0, 270.25, 131.0, 22.0 ],
 					"style" : "",
-					"text" : "prepend StrikingPosition"
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"bgmode" : 0,
-					"border" : 0,
-					"clickthrough" : 0,
-					"id" : "obj-1",
-					"linecount" : 2,
-					"maxclass" : "newobj",
-					"numinlets" : 2,
-					"numoutlets" : 8,
-					"offset" : [ 0.0, 0.0 ],
-					"outlettype" : [ "signal", "signal", "", "list", "int", "", "", "" ],
-					"patching_rect" : [ 51.0, 523.0, 385.0, 206.0 ],
-					"presentation_linecount" : 3,
-					"presentation_rect" : [ 0.0, 0.0, 300.0, 100.0 ],
-					"save" : [ "#N", "vst~", "loaduniqueid", 0, "/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/impactSynth.vst", ";" ],
-					"saved_object_attributes" : 					{
-						"parameter_enable" : 0
-					}
-,
-					"snapshot" : 					{
-						"filetype" : "C74Snapshot",
-						"version" : 1,
-						"name" : "impactSynth.vst",
-						"origin" : "impactSynth.vst",
-						"type" : "VST",
-						"subtype" : "AudioEffect",
-						"snapshot" : 						{
-							"pluginname" : "impactSynth.vst",
-							"plugindisplayname" : "impactSynth",
-							"pluginsavedname" : "/Users/geri/Documents/Uni/SMC8/P8/DrumMachine/impactSynth.vst",
-							"pluginsaveduniqueid" : 0,
-							"version" : 1,
-							"isbank" : 0,
-							"isbase64" : 1,
-							"sliderorder" : [ 0, 1, 2, 3, 4, 5 ],
-							"slidervisibility" : [ 1, 1, 1, 1, 1, 0 ],
-							"blob" : "80.CMlaKA....fQ3MzZ....AzzUgAG....Y....F.....................................vOCX.C+j0rm8yRW5hO0uN1+.H........MA­¾BTapÝº"
-						}
-
-					}
-,
-					"style" : "",
-					"text" : "vst~ /Users/geri/Documents/Uni/SMC8/P8/DrumMachine/impactSynth.vst",
-					"viewvisibility" : 1
+					"text" : "prepend StrikePosition"
 				}
 
 			}
@@ -600,7 +582,7 @@
 					"destination" : [ "obj-1", 0 ],
 					"disabled" : 0,
 					"hidden" : 0,
-					"midpoints" : [ 777.5, 243.0, 898.0, 243.0, 898.0, 510.0, 60.5, 510.0 ],
+					"midpoints" : [ 777.5, 486.0, 60.5, 486.0 ],
 					"source" : [ "obj-24", 0 ]
 				}
 
@@ -759,7 +741,7 @@
 					"destination" : [ "obj-1", 0 ],
 					"disabled" : 0,
 					"hidden" : 0,
-					"midpoints" : [ 464.5, 475.5, 60.5, 475.5 ],
+					"midpoints" : [ 464.5, 485.5, 60.5, 485.5 ],
 					"source" : [ "obj-45", 0 ]
 				}
 
@@ -814,7 +796,7 @@
 					"destination" : [ "obj-1", 0 ],
 					"disabled" : 0,
 					"hidden" : 0,
-					"midpoints" : [ 340.5, 475.5, 60.5, 475.5 ],
+					"midpoints" : [ 340.5, 485.5, 60.5, 485.5 ],
 					"source" : [ "obj-53", 0 ]
 				}
 
@@ -842,7 +824,7 @@
 					"destination" : [ "obj-1", 0 ],
 					"disabled" : 0,
 					"hidden" : 0,
-					"midpoints" : [ 212.5, 475.5, 60.5, 475.5 ],
+					"midpoints" : [ 212.5, 485.5, 60.5, 485.5 ],
 					"source" : [ "obj-55", 0 ]
 				}
 
@@ -870,7 +852,7 @@
 					"destination" : [ "obj-1", 0 ],
 					"disabled" : 0,
 					"hidden" : 0,
-					"midpoints" : [ 60.5, 475.5, 60.5, 475.5 ],
+					"midpoints" : [ 60.5, 485.5, 60.5, 485.5 ],
 					"source" : [ "obj-57", 0 ]
 				}
 
@@ -1028,7 +1010,7 @@
 					"destination" : [ "obj-1", 0 ],
 					"disabled" : 0,
 					"hidden" : 0,
-					"midpoints" : [ 747.5, 510.0, 60.5, 510.0 ],
+					"midpoints" : [ 747.5, 486.0, 60.5, 486.0 ],
 					"source" : [ "obj-88", 0 ]
 				}
 
