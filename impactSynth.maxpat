@@ -44,7 +44,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 920.0, 273.5, 29.5, 22.0 ],
-					"presentation_rect" : [ 994.0, 301.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "1"
 				}
@@ -58,7 +57,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 881.0, 273.5, 29.5, 22.0 ],
-					"presentation_rect" : [ 928.0, 298.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "0"
 				}
@@ -72,7 +70,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 881.0, 342.0, 65.0, 22.0 ],
-					"presentation_rect" : [ 969.0, 373.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "Trigger $1"
 				}

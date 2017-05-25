@@ -29,7 +29,7 @@ classdef impactSynth < audioPlugin
 
         noteState = 'noteOff'; % trig
 
-        %=================================== synth parameters
+        %====================================================================== synth parameters
         modes = [112, 203, 259, 279, 300, 332, 345, 375, 398, 407, 450, 473, 488, 488, 547, 596,...
                  625, 653, 679, 692, 705, 760, 773, 806, 852, 899, 924, 975, 998, 1019, 1046, 1109,...
                  1134, 1164, 1192, 1226, 1309, 1358, 1379, 1411, 1461, 1532, 1610, 1683, 1758, 1880,...
@@ -41,7 +41,6 @@ classdef impactSynth < audioPlugin
                  0.993 0.992 0.991 0.99 0.98 0.98 0.98 0.97 0.97 0.97];
         
         lpfPole = 0.0009; % lowpass filter pole radius - loss filter damping
-        excGain = 0.5; % gain coefficient for the excitation
         strikeGain; % gain coefficient for each mode
         m = 0; % slope of transfer fuction
         
@@ -50,7 +49,7 @@ classdef impactSynth < audioPlugin
                    audioread('Analyses/cymbal_res.wav')';
                    audioread('Analyses/kick_res.wav')'];
         resPadded; % zero padded residuals
-        %===================================
+        %======================================================================
     end
     
     properties (Constant)
@@ -63,7 +62,7 @@ classdef impactSynth < audioPlugin
            audioPluginParameter('trig','DisplayName','Trigger','Mapping',{'enum','noteOff','noteOn_'}),...
            'InputChannels',1,'OutputChannels',1);      
     end
-%--------------------------------------------------------------------------
+%----------------------------------------------------------------------------------------------------------
     methods
         function obj = impactSynth() % constructor
             obj.fs = getSampleRate(obj);
@@ -90,18 +89,19 @@ classdef impactSynth < audioPlugin
                 obj.readIndex(obj.instID) = 1; % init readIndex of respective buffer
                 obj.soundOut(obj.instID) = 1; % trigger sound according to instrument ID
 
-                %=================================== sound synthesis
+                %====================================================================== sound synthesis and parameter mapping
                 
-                obj.lpfPole = 0.00009+(0.001-0.00009)*obj.material; % material (scaling: v2 = a + (b-a) * v1)
-                obj.excGain = obj.strikeVig; % strike vigor
+                obj.lpfPole = 0.00009+(0.001-0.00009)*obj.material; % scaling: v2 = a + (b-a) * v1
                 obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.strikePos) / (length(obj.strikeGain)-1);
-                obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b) strike postion
+                obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b)
                 
                 obj.buff(obj.instID,:) = f_bdwg(obj.modes(1:24)*obj.dimension, obj.decay(1:24), length(obj.buff(1,:)), obj.fs, [0.999; 1.001], obj.lpfPole, obj.strikeGain)'; % banded waveguide
                 % waveguide mesh
+
+                obj.resPadded(obj.instID,:) =  compressRange(obj.resPadded(obj.instID,:), obj.strikeVig);% compression of residual
                 obj.buff(obj.instID,:) = real(ifft(fft(obj.buff(obj.instID,:)) .* fft(obj.resPadded(obj.instID,:)))); % convolution with residual (multiplication of spectrums)
-                obj.buff(obj.instID,:) = obj.buff(obj.instID,:) / max(obj.buff(obj.instID,:)); % normalisation
-                %===================================
+                obj.buff(obj.instID,:) = obj.buff(obj.instID,:) / max(obj.buff(obj.instID,:)); % normalisation of synth buffer
+                %======================================================================
 
             end
 
@@ -131,12 +131,12 @@ classdef impactSynth < audioPlugin
                 end    
             end
             
-            out = (obj.frameBuff(1:length(in))*obj.excGain)'; % output
+            out = obj.frameBuff(1:length(in))'; % output
             obj.frameBuff = zeros(1,length(obj.frameBuff)); % clear frame buffer
 
         end  
     end
-%--------------------------------------------------------------------------
+%----------------------------------------------------------------------------------------------------------
     methods (Static)        
         function configureMIDI(obj,varargin)
             % Configure MIDI connections.
@@ -157,10 +157,30 @@ classdef impactSynth < audioPlugin
         end
     end
 end
-%--------------------------------------------------------------------------
-%=================================== synth functions
+%----------------------------------------------------------------------------------------------------------
+    function y = compressRange(x, threshold) % dynamic compresson
 
-function out = f_bdwg( freqs, decay, Tsamp, fs, low_high, damp, bandCoeff)
+        y = x;
+        ratio = 10; % compression ratio
+        
+        % y intercept (transfer function y=mx+b)
+        b  = threshold - threshold*ratio; 
+
+        % process dynamics
+        polar = sign(x); % retain sign of waveform (the polarity)
+        x = abs(x);         % absolute amplitude value
+
+        for i=1:length(x)
+            if x(i) > threshold % compress
+                y(i) = (ratio*x(i)+b)*polar(i);        
+            else % do not compress
+                y(i) = x(i)*polar(i);
+            end
+        end
+                
+    end
+
+function out = f_bdwg( freqs, decay, Tsamp, fs, low_high, damp, bandCoeff) % banded waveguide
     % Banded digital waveguide function
     
     %% variables
