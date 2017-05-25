@@ -6,7 +6,7 @@ classdef impactSynth < audioPlugin
         strikePos = 1;
         strikeVig = 1;
         dimension = 1;
-        material = 0;
+        material = 1;
 
         instID = 1; % instrument ID
     end
@@ -40,7 +40,7 @@ classdef impactSynth < audioPlugin
                  0.993 0.992 0.992 0.991 0.991 0.991 0.991 0.991 0.991 0.991 0.991 0.991 0.99...
                  0.993 0.992 0.991 0.99 0.98 0.98 0.98 0.97 0.97 0.97];
         
-        lpfPole = 0.0009; % lowpass filter pole radius - loss filter damping
+        lpfPole = 0.5; % lowpass filter pole radius - loss filter damping
         excGain = 0.5; % gain coefficient for the excitation
         strikeGain; % gain coefficient for each mode
         m = 0; % slope of transfer fuction
@@ -92,7 +92,7 @@ classdef impactSynth < audioPlugin
 
                 %=================================== sound synthesis
                 
-                obj.lpfPole = 0.00009+(0.001-0.00009)*obj.material; % material (scaling: v2 = a + (b-a) * v1)
+                obj.lpfPole = 0.00009+(0.001-0.0000)*obj.material; % material (scaling: v2 = a + (b-a) * v1)
                 obj.excGain = obj.strikeVig; % strike vigor
                 obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.strikePos) / (length(obj.strikeGain)-1);
                 obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b) strike postion
