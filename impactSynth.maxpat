@@ -44,7 +44,6 @@
 					"numoutlets" : 2,
 					"outlettype" : [ "bang", "bang" ],
 					"patching_rect" : [ 681.0, 373.0, 34.0, 22.0 ],
-					"presentation_rect" : [ 618.0, 389.5, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "t b b"
 				}
@@ -59,7 +58,7 @@
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 681.0, 423.0, 50.0, 22.0 ],
 					"style" : "",
-					"text" : "ID 0.66"
+					"text" : "ID 0"
 				}
 
 			}
@@ -114,7 +113,7 @@
 							"isbase64" : 1,
 							"sliderorder" : [ 0, 1, 2, 3, 4, 5 ],
 							"slidervisibility" : [ 1, 1, 1, 1, 1, 1 ],
-							"blob" : "80.CMlaKA....fQ3MzZ....AzzUgAG....Y....F.....................................vOQM5Q9D9vG5i7ur1OO3AO+nhpqB....."
+							"blob" : "80.CMlaKA....fQ3MzZ....AzzUgAG....Y....F.....................................vOQM5Q9D9vG5i7ur1OO3AO..........."
 						}
 
 					}
