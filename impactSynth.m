@@ -29,6 +29,7 @@ classdef impactSynth < audioPlugin
 
         noteState = 'noteOff'; % trig
 
+        pastVal = [0, 0, 0, 0]; % variable storing past interfaced parameter values
         %====================================================================== synth parameters
         modes = [112, 203, 259, 279, 300, 332, 345, 375, 398, 407, 450, 473, 488, 488, 547, 596,...
                  625, 653, 679, 692, 705, 760, 773, 806, 852, 899, 924, 975, 998, 1019, 1046, 1109,...
@@ -77,6 +78,10 @@ classdef impactSynth < audioPlugin
                              obj.resBank(2,:), zeros(1, obj.fs*obj.t-length(obj.resBank(2,:)));
                              obj.resBank(3,:), zeros(1, obj.fs*obj.t-length(obj.resBank(3,:)));
                              obj.resBank(4,:), zeros(1, obj.fs*obj.t-length(obj.resBank(4,:)));];
+            obj.pastVal(1) = 0;
+            obj.pastVal(2) = 0;
+            obj.pastVal(3) = 0;
+            obj.pastVal(4) = 1;
         end                                   
         
         function reset(obj)
@@ -86,24 +91,33 @@ classdef impactSynth < audioPlugin
         
         function set.trig(obj, val)
             if val == 'noteOn_'
+
+                %====================================================================== sound synthesis and parameter mapping
+                if obj.pastVal(1) ~= obj.strikePos || obj.pastVal(2) ~= obj.strikeVig || obj.pastVal(3) ~= obj.dimension || obj.pastVal(4) ~= obj.material % synth new waveform only if parameters are changed
+                    obj.lpfPole = 0.00009+(0.001-0.00009)*obj.material; % scaling: v2 = a + (b-a) * v1
+                    obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.strikePos) / (length(obj.strikeGain)-1);
+                    obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b)
+
+                    obj.buff(obj.instID,:) = f_bdwg(obj.modes(1:24)*obj.dimension, obj.decay(1:24), length(obj.buff(1,:)), obj.fs, [0.999; 1.001], obj.lpfPole, obj.strikeGain)'; % banded waveguide
+                    % waveguide mesh
+    
+                    obj.buff(obj.instID,:) = real(ifft(fft(obj.buff(obj.instID,:)) .* fft(obj.resPadded(obj.instID,:)))); % convolution with residual (multiplication of spectrums)
+                    
+                    obj.buff(obj.instID,:) = obj.buff(obj.instID,:) / max(obj.buff(obj.instID,:)); % normalisation of synth buffer
+    
+                    %obj.buff(obj.instID,:) =  compressRange(obj.buff(obj.instID,:), obj.strikeVig); % compression
+                    obj.buff(obj.instID,:) = obj.buff(obj.instID,:) * obj.strikeVig; % linear scaling
+                end
+                %======================================================================
+
                 obj.readIndex(obj.instID) = 1; % init readIndex of respective buffer
                 obj.soundOut(obj.instID) = 1; % trigger sound according to instrument ID
 
-                %====================================================================== sound synthesis and parameter mapping
-                
-                obj.lpfPole = 0.00009+(0.001-0.00009)*obj.material; % scaling: v2 = a + (b-a) * v1
-                obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.strikePos) / (length(obj.strikeGain)-1);
-                obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b)
-                
-                obj.buff(obj.instID,:) = f_bdwg(obj.modes(1:24)*obj.dimension, obj.decay(1:24), length(obj.buff(1,:)), obj.fs, [0.999; 1.001], obj.lpfPole, obj.strikeGain)'; % banded waveguide
-                % waveguide mesh
-
-                obj.resPadded(obj.instID,:) =  compressRange(obj.resPadded(obj.instID,:), obj.strikeVig);% compression of residual
-                obj.buff(obj.instID,:) = real(ifft(fft(obj.buff(obj.instID,:)) .* fft(obj.resPadded(obj.instID,:)))); % convolution with residual (multiplication of spectrums)
-                obj.buff(obj.instID,:) = obj.buff(obj.instID,:) / max(obj.buff(obj.instID,:)); % normalisation of synth buffer
-                %======================================================================
-
             end
+            obj.pastVal(1) = obj.strikePos;
+            obj.pastVal(2) = obj.strikeVig;
+            obj.pastVal(3) = obj.dimension;
+            obj.pastVal(4) = obj.material;
 
             obj.noteState = val;
         end 
@@ -161,7 +175,7 @@ end
     function y = compressRange(x, threshold) % dynamic compresson
 
         y = x;
-        ratio = 10; % compression ratio
+        ratio = 4/1; % compression ratio
         
         % y intercept (transfer function y=mx+b)
         b  = threshold - threshold*ratio; 
@@ -177,7 +191,8 @@ end
                 y(i) = x(i)*polar(i);
             end
         end
-                
+        y = y / max(y);
+
     end
 
 function out = f_bdwg( freqs, decay, Tsamp, fs, low_high, damp, bandCoeff) % banded waveguide
