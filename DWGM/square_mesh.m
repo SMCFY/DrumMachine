@@ -8,8 +8,9 @@ fs = 44100; % sampling frequency
 
 Tsec = 1; % duration of simulation (Seconds)
 Tsamp = Tsec*fs; % duration of simulation (Samples)
+%Tsamp = round(length(cymOriginal)/2);
 
-NJ = 12; % number of junctions
+NJ = 6; % number of junctions
 
 % initialize calculation matrices
 
@@ -32,8 +33,8 @@ y = zeros(1, Tsamp); % output
 % reflexion
 
 r_coeff = -1; % reflexion coefficient (-1 for perfect inverse phase reflection)
-decayFactor = 0.9999; 
-a = -0.9;
+decayFactor = 0.999; 
+a = 0.001;
 b = 1 - abs(a);
 
 % b = [0.5 0.5];
@@ -44,8 +45,8 @@ b = 1 - abs(a);
 
 % excitation position and size
 
-excite_size = floor(NJ/5); % excitation size
-excite_pos = floor(NJ/2); % excitation centrale position (gravity center of the strike)
+excite_size = ceil(NJ/5); % excitation size
+excite_pos = ceil(NJ/2); % excitation centrale position (gravity center of the strike)
 % exite_pos = round((NJ-exite_size)/2); % center position (middle-10%)
 
 % excitation shape and velocity
@@ -61,10 +62,6 @@ vW1(1:NJ-1, 1:NJ-1) = excite;
 vN1(1:NJ-1, 1:NJ-1) = excite;
 vE1(1:NJ-1, 2:NJ) = excite;
 vS1(2:NJ, 1:NJ-1) = excite;
-
-
-%% 
-
 
 %% Main loop
 
@@ -113,28 +110,30 @@ for i = 1:Tsamp
     y(i) = v(NJ-1,NJ-1);
 end
 
+y=y/max(y);
+
 soundsc(y,fs)
 plot(y)
 
 %[res, fsres]=audioread('snare_sample_residual.wav');
 
 %% 
-y = y';
-fftSize = 1024; % window size
-startfft = 1;
-window = y(startfft:end).*hamming(length(y(startfft:end))); % hamming window of the attack
-window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
-Xmag = abs(fft(window)); % magnitude spectrum
-
-w = [0:length(window)-1].*fs/length(window); %frequency in Hertz
-
-figure
-% subplot(2,1,1);
-% plot(window); % time domain
-% title('windowed signal');
-% subplot(2,1,2);
-plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2))); % db spectrum
-title('magnitude spectrum');
+% y = y';
+% fftSize = 1024; % window size
+% startfft = 1;
+% window = y(startfft:end).*hamming(length(y(startfft:end))); % hamming window of the attack
+% window = [window; zeros(2^15,1)]; % zero padded signal (higher DFT resolution)
+% Xmag = abs(fft(window)); % magnitude spectrum
+% 
+% w = [0:length(window)-1].*fs/length(window); %frequency in Hertz
+% 
+% figure
+% % subplot(2,1,1);
+% % plot(window); % time domain
+% % title('windowed signal');
+% % subplot(2,1,2);
+% plot(w(1:length(w)/2), 20*log10(Xmag(1:length(Xmag)/2))); % db spectrum
+% title('magnitude spectrum');
 
 
 

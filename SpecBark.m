@@ -1,10 +1,13 @@
-function [pxx, f] = Spec( x, fs, color)
+function SpecBark( x, fs, low, high)
+
 
 %x = x(t:t+1024);
 [pxx,f] = pwelch(x,[],[],2*fs,fs);
-%figure
+low = find(f==low);
+high = find(f==high);
+figure
 %plot(f(1:fmax), 10*log10(pxx(1:fmax)), 'r') %*fs/2
-plot(f, 10*log10(pxx), color)
+plot(f(low:high), 10*log10(pxx(low:high)), 'r')
 %semilogx(f, 10*log10(pxx), 'r') % plot data as logarithmic scales for the x-axis
 %xlim([0 (max(f)+5000)])
 grid on
@@ -19,4 +22,3 @@ set(gca, 'xscale', 'linear')
 %line([80 80],yL,'Color','b')
 
 end
-
