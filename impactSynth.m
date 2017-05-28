@@ -8,15 +8,15 @@ classdef impactSynth < audioPlugin
         dimension = 1;
         material = 0;
 
-        paramID = 1; % parameter ID
-        instID = 1; % instrument ID
+        paramID = 1; % parameter ID (selected instrument)
+        instID = 1; % instrument ID (triggered instrument)
     end
     
     properties (Dependent)
         trig = 'noteOff'; % noteState
     end
     
-    properties (Access = public)
+    properties (Access = private)
         % vst parameters
         fs; % sampling rate
         
@@ -30,7 +30,12 @@ classdef impactSynth < audioPlugin
 
         noteState = 'noteOff'; % trig
 
-        storedParam = zeros(4,4); % variable storing past interfaced parameter values
+        storedParamSet = zeros(4,4); % stored parameters
+        newParamSet = [1 1 1 0;
+                       1 1 1 0;
+                       1 1 1 0;
+                       1 1 1 0]; % new parameters
+
         %====================================================================== synth parameters
         modes = zeros(4,55);
         decay = zeros(4,55);
@@ -74,35 +79,32 @@ classdef impactSynth < audioPlugin
                              obj.resBank(2,:), zeros(1, obj.fs*obj.t-length(obj.resBank(2,:)));
                              obj.resBank(3,:), zeros(1, obj.fs*obj.t-length(obj.resBank(3,:)));
                              obj.resBank(4,:), zeros(1, obj.fs*obj.t-length(obj.resBank(4,:)));];
-            obj.storedParam = [0 0 0 1;
-                           0 0 0 1;
-                           0 0 0 1;
-                           0 0 0 1];
+
             obj.modes(1,:) = [112, 203, 259, 279, 300, 332, 345, 375, 398, 407,...
-                450, 473, 488, 488, 547, 596, 625, 653, 679, 692, 705, 760, 773,...
-                806, 852, 899, 924, 975, 998, 1019, 1046, 1109, 1134, 1164, 1192,...
-                1226, 1309, 1358, 1379, 1411, 1461, 1532, 1610, 1683, 1758, 1880,...
-                2027, 2131, 2271, 2515, 2731, 2809, 2922, 3224, 4694];
+                              450, 473, 488, 488, 547, 596, 625, 653, 679, 692, 705, 760, 773,...
+                              806, 852, 899, 924, 975, 998, 1019, 1046, 1109, 1134, 1164, 1192,...
+                              1226, 1309, 1358, 1379, 1411, 1461, 1532, 1610, 1683, 1758, 1880,...
+                              2027, 2131, 2271, 2515, 2731, 2809, 2922, 3224, 4694];
             obj.modes(2,:) = [706 190 705 1145 967 957 985 1003 835 294 415 530 ...
-                791 1216 1291 1339 1469 1874 1958 3049 4616 5656 zeros(1,55-22)];
+                              791 1216 1291 1339 1469 1874 1958 3049 4616 5656 zeros(1,55-22)];
             obj.modes(3,:) = [79 693 836 883 1212 1511 1793 1863 2666 3198 3657 ...
-                3741 4556 4725 4867 5005 6165 5768 zeros(1,55-18)];  % 6461
+                              3741 4556 4725 4867 5005 6165 5768 zeros(1,55-18)];  % 6461
             obj.modes(4,:) = [27 44 54 72 100 123 151 170 232 247 263 299 317 ...
-                331 353 368 409 618 zeros(1,55-18)];
+                              331 353 368 409 618 zeros(1,55-18)];
+
             obj.decay(1,:) = [0.9999 0.9999 0.9998 0.9998 0.9998 0.9997 0.9997 0.9996 ...
-                0.9996 0.9995 0.9995 0.9994 0.9994 0.9993 0.9993 0.9992 0.9992 0.9991 ...
-                0.9991 0.999 0.999 0.998 0.998 0.997 0.997 0.996 0.996 0.995 0.995 0.994 ...
-                0.994 0.993 0.993 0.992 0.992 0.991 0.991 0.991 0.991 0.991 0.991 0.991 ...
-                0.991 0.991 0.99 0.993 0.992 0.991 0.99 0.98 0.98 0.98 0.97 0.97 0.97];
+                              0.9996 0.9995 0.9995 0.9994 0.9994 0.9993 0.9993 0.9992 0.9992 0.9991 ...
+                              0.9991 0.999 0.999 0.998 0.998 0.997 0.997 0.996 0.996 0.995 0.995 0.994 ...
+                              0.994 0.993 0.993 0.992 0.992 0.991 0.991 0.991 0.991 0.991 0.991 0.991 ...
+                              0.991 0.991 0.99 0.993 0.992 0.991 0.99 0.98 0.98 0.98 0.97 0.97 0.97];
             obj.decay(2,:) = [0.99 0.99 0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 ...
-                0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 ...
-                0.98 zeros(1,55-22)];
+                              0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 0.98 ...
+                              0.98 zeros(1,55-22)];
             obj.decay(3,:) = [0.99 0.9998 0.9998 0.9989 0.999 0.995 0.995 0.995 0.9999 0.994 ...
-                0.9998 0.9998 0.9998 0.994 0.994 0.999 0.999 0.999 zeros(1,55-18)];
+                              0.9998 0.9998 0.9998 0.994 0.994 0.999 0.999 0.999 zeros(1,55-18)];
             obj.decay(4,:) = [0.999 0.99 0.99 0.99 0.99 0.9 0.9 0.98 0.9 0.94 0.94 0.98 ...
-                0.94 0.94 0.94 0.94 0.93 0.92 zeros(1,55-18)];
-            
-            %obj.param = repmat([obj.strikePos, obj.strikeVig, obj.dimension, obj.material],4,1);
+                              0.94 0.94 0.94 0.94 0.93 0.92 zeros(1,55-18)];
+     
         end
         
         function reset(obj)
@@ -113,27 +115,30 @@ classdef impactSynth < audioPlugin
         function set.trig(obj, val)
             if val == 'noteOn_'
 
+                obj.newParamSet(obj.paramID, 1) = obj.strikePos; % get new parameters for selected instrument
+                obj.newParamSet(obj.paramID, 2) = obj.strikeVig;
+                obj.newParamSet(obj.paramID, 3) = obj.dimension;
+                obj.newParamSet(obj.paramID, 4) = obj.material;
                 %====================================================================== sound synthesis and parameter mapping
-                
-                if obj.storedParam(obj.instID,1) ~= obj.strikePos || obj.storedParam(obj.instID,2) ~= obj.strikeVig || obj.storedParam(obj.instID,3) ~= obj.dimension || obj.storedParam(obj.instID,4) ~= obj.material % synth new waveform only if parameters are changed
-                    obj.lpfPole = 0.00009+(0.001-0.00009)*obj.material; % scaling: v2 = a + (b-a) * v1
-                    obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.strikePos) / (length(obj.strikeGain)-1);
-                    obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b)
 
-                    obj.buff(obj.instID,:) = f_bdwg(obj.modes(obj.instID, 1:24)*obj.dimension, obj.decay(obj.instID, 1:24), length(obj.buff(1,:)), obj.fs, [0.999; 1.001], obj.lpfPole, obj.strikeGain)'; % banded waveguide
+                if obj.storedParamSet(obj.instID,1) ~= obj.newParamSet(obj.instID, 1) || obj.storedParamSet(obj.instID,2) ~= obj.newParamSet(obj.instID, 2) || obj.storedParamSet(obj.instID,3) ~= obj.newParamSet(obj.instID, 3) || obj.storedParamSet(obj.instID,4) ~= obj.newParamSet(obj.instID, 4) % synth new waveform only if parameters are changed for the triggered instrument
+                    obj.lpfPole = 0.00009+(0.001-0.00009)*obj.newParamSet(obj.instID,4); % scaling: v2 = a + (b-a) * v1
+                    obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.newParamSet(obj.instID,1)) / (length(obj.strikeGain)-1);
+                    obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.newParamSet(obj.instID,1) - obj.m; % (y=mx+b)
+
+                    obj.buff(obj.instID,:) = f_bdwg(obj.modes(obj.instID, 1:24)*obj.newParamSet(obj.instID,3), obj.decay(obj.instID, 1:24), length(obj.buff(1,:)), obj.fs, [0.999; 1.001], obj.lpfPole, obj.strikeGain)'; % banded waveguide
                     % waveguide mesh
     
                     obj.buff(obj.instID,:) = real(ifft(fft(obj.buff(obj.instID,:)) .* fft(obj.resPadded(obj.instID,:)))); % convolution with residual (multiplication of spectrums)
                     
                     obj.buff(obj.instID,:) = obj.buff(obj.instID,:) / max(obj.buff(obj.instID,:)); % normalisation of synth buffer
     
-                    %obj.buff(obj.instID,:) =  compressRange(obj.buff(obj.instID,:), obj.strikeVig); % compression
-                    obj.buff(obj.instID,:) = obj.buff(obj.instID,:) * obj.strikeVig; % linear scaling
+                    obj.buff(obj.instID,:) = obj.buff(obj.instID,:) * obj.newParamSet(obj.instID,2); % linear scaling
                     
-                    obj.storedParam(obj.paramID, 1) = obj.strikePos; % update instrument parameters
-                    obj.storedParam(obj.paramID, 2) = obj.strikeVig;
-                    obj.storedParam(obj.paramID, 3) = obj.dimension;
-                    obj.storedParam(obj.paramID, 4) = obj.material;
+                    obj.storedParamSet(obj.instID, 1) = obj.newParamSet(obj.instID, 1); % update stored parameters for triggered instrument
+                    obj.storedParamSet(obj.instID, 2) = obj.newParamSet(obj.instID, 2);
+                    obj.storedParamSet(obj.instID, 3) = obj.newParamSet(obj.instID, 3);
+                    obj.storedParamSet(obj.instID, 4) = obj.newParamSet(obj.instID, 4);
                     
                 end
                 %======================================================================
@@ -196,29 +201,6 @@ classdef impactSynth < audioPlugin
     end
 end
 %----------------------------------------------------------------------------------------------------------
-    function y = compressRange(x, threshold) % dynamic compresson
-
-        y = x;
-        ratio = 4/1; % compression ratio
-        
-        % y intercept (transfer function y=mx+b)
-        b  = threshold - threshold*ratio; 
-
-        % process dynamics
-        polar = sign(x); % retain sign of waveform (the polarity)
-        x = abs(x);         % absolute amplitude value
-
-        for i=1:length(x)
-            if x(i) > threshold % compress
-                y(i) = (ratio*x(i)+b)*polar(i);        
-            else % do not compress
-                y(i) = x(i)*polar(i);
-            end
-        end
-        y = y / max(y);
-
-    end
-
 function out = f_bdwg( freqs, decay, Tsamp, fs, low_high, damp, bandCoeff) % banded waveguide
     % Banded digital waveguide function
     
