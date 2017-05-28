@@ -8,6 +8,7 @@ classdef impactSynth < audioPlugin
         dimension = 1;
         material = 0;
 
+        paramID = 1; % parameter ID
         instID = 1; % instrument ID
     end
     
@@ -21,19 +22,18 @@ classdef impactSynth < audioPlugin
         
         buff; % buffer for generated waveform
         t = 2; % buffer length in seconds
-        readIndex = ones(4,4); % reading position in buffers
-        soundOut = zeros(4,4); % state variable decides whether to output the signal from the buffer or not
+        readIndex = ones(4,1); % reading position in buffers
+        soundOut = zeros(4,1); % state variable decides whether to output the signal from the buffer or not
 
         frameBuff; % buffer for output frame
         maxFrameSize; % maximum frame size in samples
 
         noteState = 'noteOff'; % trig
 
-        pastVal = zeros(4,4); % variable storing past interfaced parameter values
+        storedParam = zeros(4,4); % variable storing past interfaced parameter values
         %====================================================================== synth parameters
         modes = zeros(4,55);
         decay = zeros(4,55);
-        % instru_info = load('Analyses/modes_10k.mat');
 
         lpfPole = 0.0009; % lowpass filter pole radius - loss filter damping
         strikeGain; % gain coefficient for each mode
@@ -45,8 +45,6 @@ classdef impactSynth < audioPlugin
                    audioread('Analyses/kick_res.wav')'];
         resPadded; % zero padded residuals
         
-        %param = zeros(4,4);
-        
         %======================================================================
     end
     
@@ -56,6 +54,7 @@ classdef impactSynth < audioPlugin
            audioPluginParameter('strikeVig','DisplayName','StrikeVigor','Mapping',{'lin',0,1}),...
            audioPluginParameter('dimension','DisplayName','Dimension','Mapping',{'lin',0.5,1.5}),...
            audioPluginParameter('material','DisplayName','Material','Mapping',{'lin',0,1}),...
+           audioPluginParameter('paramID','DisplayName','ParameterID','Mapping',{'int',1,4}),...
            audioPluginParameter('instID','DisplayName','ID','Mapping',{'int',1,4}),...
            audioPluginParameter('trig','DisplayName','Trigger','Mapping',{'enum','noteOff','noteOn_'}),...
            'InputChannels',1,'OutputChannels',1);      
@@ -75,11 +74,7 @@ classdef impactSynth < audioPlugin
                              obj.resBank(2,:), zeros(1, obj.fs*obj.t-length(obj.resBank(2,:)));
                              obj.resBank(3,:), zeros(1, obj.fs*obj.t-length(obj.resBank(3,:)));
                              obj.resBank(4,:), zeros(1, obj.fs*obj.t-length(obj.resBank(4,:)));];
-%             obj.pastVal(1,1) = 0; obj.pastVal(1,2) = 0; obj.pastVal(1,3) = 0; obj.pastVal(1,4) = 1;
-%             obj.pastVal(2,1) = 0; obj.pastVal(2,2) = 0; obj.pastVal(2,3) = 0; obj.pastVal(2,4) = 1;
-%             obj.pastVal(3,1) = 0; obj.pastVal(3,2) = 0; obj.pastVal(3,3) = 0; obj.pastVal(3,4) = 1;
-%             obj.pastVal(4,1) = 0; obj.pastVal(4,2) = 0; obj.pastVal(4,3) = 0; obj.pastVal(4,4) = 1;
-            obj.pastVal = [0 0 0 1;
+            obj.storedParam = [0 0 0 1;
                            0 0 0 1;
                            0 0 0 1;
                            0 0 0 1];
@@ -119,7 +114,8 @@ classdef impactSynth < audioPlugin
             if val == 'noteOn_'
 
                 %====================================================================== sound synthesis and parameter mapping
-                if obj.pastVal(obj.instID,1) ~= obj.strikePos || obj.pastVal(obj.instID,2) ~= obj.strikeVig || obj.pastVal(obj.instID,3) ~= obj.dimension || obj.pastVal(obj.instID,4) ~= obj.material % synth new waveform only if parameters are changed
+                
+                if obj.storedParam(obj.instID,1) ~= obj.strikePos || obj.storedParam(obj.instID,2) ~= obj.strikeVig || obj.storedParam(obj.instID,3) ~= obj.dimension || obj.storedParam(obj.instID,4) ~= obj.material % synth new waveform only if parameters are changed
                     obj.lpfPole = 0.00009+(0.001-0.00009)*obj.material; % scaling: v2 = a + (b-a) * v1
                     obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.strikePos) / (length(obj.strikeGain)-1);
                     obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.strikePos - obj.m; % (y=mx+b)
@@ -134,10 +130,10 @@ classdef impactSynth < audioPlugin
                     %obj.buff(obj.instID,:) =  compressRange(obj.buff(obj.instID,:), obj.strikeVig); % compression
                     obj.buff(obj.instID,:) = obj.buff(obj.instID,:) * obj.strikeVig; % linear scaling
                     
-                    obj.pastVal(obj.instID, 1) = obj.strikePos; % update instrument parameters
-                    obj.pastVal(obj.instID, 2) = obj.strikeVig;
-                    obj.pastVal(obj.instID, 3) = obj.dimension;
-                    obj.pastVal(obj.instID, 4) = obj.material;
+                    obj.storedParam(obj.paramID, 1) = obj.strikePos; % update instrument parameters
+                    obj.storedParam(obj.paramID, 2) = obj.strikeVig;
+                    obj.storedParam(obj.paramID, 3) = obj.dimension;
+                    obj.storedParam(obj.paramID, 4) = obj.material;
                     
                 end
                 %======================================================================

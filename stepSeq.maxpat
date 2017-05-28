@@ -9,7 +9,7 @@
 			"modernui" : 1
 		}
 ,
-		"rect" : [ 1736.0, 120.0, 1015.0, 832.0 ],
+		"rect" : [ 34.0, 78.0, 1372.0, 832.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -201,7 +201,7 @@
 					"numoutlets" : 0,
 					"patching_rect" : [ 272.0, 14.5, 150.0, 20.0 ],
 					"style" : "",
-					"text" : "DIVISION"
+					"text" : "DURATION"
 				}
 
 			}
@@ -296,9 +296,9 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 494.5, 1084.25, 70.0, 22.0 ],
+					"patching_rect" : [ 439.5, 1084.25, 126.0, 22.0 ],
 					"style" : "",
-					"text" : "prepend ID"
+					"text" : "prepend ParameterID"
 				}
 
 			}
@@ -579,9 +579,9 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 831.5, 720.0, 51.0, 22.0 ],
+					"patching_rect" : [ 831.5, 720.0, 89.0, 22.0 ],
 					"style" : "",
-					"text" : "ID 0"
+					"text" : "InstrumentID 0"
 				}
 
 			}
@@ -11979,9 +11979,9 @@
 							"version" : 1,
 							"isbank" : 0,
 							"isbase64" : 1,
-							"sliderorder" : [ 0, 1, 2, 3, 4, 5 ],
-							"slidervisibility" : [ 1, 1, 1, 1, 1, 1 ],
-							"blob" : "80.CMlaKA....fQ3MzZ....AzzUgAG....Y....F.....................................fOwJlw+.H..3SVydlOspUs..........."
+							"sliderorder" : [ 0, 1, 2, 3, 4, 5, 6 ],
+							"slidervisibility" : [ 1, 1, 1, 1, 1, 1, 1 ],
+							"blob" : "84.CMlaKA....fQ3MzZ....AzzUgAG....Y....G.....................................fOSCEq+PUMk+CDWSoOqo7F.....7Cf........ܙ"
 						}
 
 					}
