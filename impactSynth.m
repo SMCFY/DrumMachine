@@ -15,7 +15,7 @@ classdef impactSynth < audioPlugin
         trig = 'noteOff'; % noteState
     end
     
-    properties (Access = private)
+    properties (Access = public)
         % vst parameters
         fs; % sampling rate
         
@@ -75,10 +75,14 @@ classdef impactSynth < audioPlugin
                              obj.resBank(2,:), zeros(1, obj.fs*obj.t-length(obj.resBank(2,:)));
                              obj.resBank(3,:), zeros(1, obj.fs*obj.t-length(obj.resBank(3,:)));
                              obj.resBank(4,:), zeros(1, obj.fs*obj.t-length(obj.resBank(4,:)));];
-            obj.pastVal(1,1) = 0; obj.pastVal(1,2) = 0; obj.pastVal(1,3) = 0; obj.pastVal(1,4) = 1;
-            obj.pastVal(2,1) = 0; obj.pastVal(2,2) = 0; obj.pastVal(2,3) = 0; obj.pastVal(2,4) = 1;
-            obj.pastVal(3,1) = 0; obj.pastVal(3,2) = 0; obj.pastVal(3,3) = 0; obj.pastVal(3,4) = 1;
-            obj.pastVal(4,1) = 0; obj.pastVal(4,2) = 0; obj.pastVal(4,3) = 0; obj.pastVal(4,4) = 1;
+%             obj.pastVal(1,1) = 0; obj.pastVal(1,2) = 0; obj.pastVal(1,3) = 0; obj.pastVal(1,4) = 1;
+%             obj.pastVal(2,1) = 0; obj.pastVal(2,2) = 0; obj.pastVal(2,3) = 0; obj.pastVal(2,4) = 1;
+%             obj.pastVal(3,1) = 0; obj.pastVal(3,2) = 0; obj.pastVal(3,3) = 0; obj.pastVal(3,4) = 1;
+%             obj.pastVal(4,1) = 0; obj.pastVal(4,2) = 0; obj.pastVal(4,3) = 0; obj.pastVal(4,4) = 1;
+            obj.pastVal = [0 0 0 1;
+                           0 0 0 1;
+                           0 0 0 1;
+                           0 0 0 1];
             obj.modes(1,:) = [112, 203, 259, 279, 300, 332, 345, 375, 398, 407,...
                 450, 473, 488, 488, 547, 596, 625, 653, 679, 692, 705, 760, 773,...
                 806, 852, 899, 924, 975, 998, 1019, 1046, 1109, 1134, 1164, 1192,...
@@ -107,8 +111,8 @@ classdef impactSynth < audioPlugin
         end
         
         function reset(obj)
-            obj.readIndex = ones(4,4);
-            obj.soundOut = zeros(4,4);
+            obj.readIndex = ones(4,1);
+            obj.soundOut = zeros(4,1);
         end 
         
         function set.trig(obj, val)
@@ -129,18 +133,20 @@ classdef impactSynth < audioPlugin
     
                     %obj.buff(obj.instID,:) =  compressRange(obj.buff(obj.instID,:), obj.strikeVig); % compression
                     obj.buff(obj.instID,:) = obj.buff(obj.instID,:) * obj.strikeVig; % linear scaling
+                    
+                    obj.pastVal(obj.instID, 1) = obj.strikePos; % update instrument parameters
+                    obj.pastVal(obj.instID, 2) = obj.strikeVig;
+                    obj.pastVal(obj.instID, 3) = obj.dimension;
+                    obj.pastVal(obj.instID, 4) = obj.material;
+                    
                 end
                 %======================================================================
 
                 obj.readIndex(obj.instID) = 1; % init readIndex of respective buffer
                 obj.soundOut(obj.instID) = 1; % trigger sound according to instrument ID
-
+           
             end
-            obj.pastVal(obj.instID, 1) = obj.strikePos;
-            obj.pastVal(obj.instID, 2) = obj.strikeVig;
-            obj.pastVal(obj.instID, 3) = obj.dimension;
-            obj.pastVal(obj.instID, 4) = obj.material;
-
+            
             obj.noteState = val;
         end 
         
