@@ -7,8 +7,6 @@ classdef impactSynth_JT < audioPlugin
         strikeVig = 1;
         dimension = 1;
         material = 0;
-        % test param
-        bandwidth = 0.999;
         n_Modes = 24;
 
         paramID = 1; % parameter ID (selected instrument)
@@ -34,14 +32,15 @@ classdef impactSynth_JT < audioPlugin
         noteState = 'noteOff'; % trig
 
         storedParamSet = zeros(4,6); % stored parameters
-        newParamSet = [1 1 1 0 0.999 55;
-                       1 1 1 0 0.999 55;
-                       1 1 1 0 0.999 55;
-                       1 1 1 0 0.999 55]; % new parameters
+        newParamSet = [1 1 1 0 55;
+                       1 1 1 0 55;
+                       1 1 1 0 55;
+                       1 1 1 0 55]; % new parameters
 
         %====================================================================== synth parameters
         modes = zeros(4,55);
         decay = zeros(4,55);
+        bandwidth = 2; % bandwidth of bandpass filter, interval [1,5] (Mitsuko)
 
         lpfPole = 0.0009; % lowpass filter pole radius - loss filter damping
         strikeGain; % gain coefficient for each mode
@@ -62,8 +61,7 @@ classdef impactSynth_JT < audioPlugin
            audioPluginParameter('strikeVig','DisplayName','StrikeVigor','Mapping',{'lin',0,1}),...
            audioPluginParameter('dimension','DisplayName','Dimension','Mapping',{'lin',0.5,1.3}),...
            audioPluginParameter('material','DisplayName','Material','Mapping',{'lin',0,1}),...
-           audioPluginParameter('bandwidth','DisplayName','Bandwidth','Mapping',{'lin',0.7,0.999}),...
-           audioPluginParameter('n_Modes','DisplayName','Number of modes','Mapping',{'int',1,55}),...
+           audioPluginParameter('n_Modes','DisplayName','Richness','Mapping',{'int',1,55}),...
            audioPluginParameter('paramID','DisplayName','ParameterID','Mapping',{'int',1,4}),...
            audioPluginParameter('instID','DisplayName','ID','Mapping',{'int',1,4}),...
            audioPluginParameter('trig','DisplayName','Trigger','Mapping',{'enum','noteOff','noteOn_'}),...
@@ -123,26 +121,25 @@ classdef impactSynth_JT < audioPlugin
                 obj.newParamSet(obj.paramID, 2) = obj.strikeVig;
                 obj.newParamSet(obj.paramID, 3) = obj.dimension;
                 obj.newParamSet(obj.paramID, 4) = obj.material;
-                obj.newParamSet(obj.paramID, 5) = obj.bandwidth;
-                obj.newParamSet(obj.paramID, 6) = obj.n_Modes;
+                obj.newParamSet(obj.paramID, 5) = obj.n_Modes;
                 %====================================================================== sound synthesis and parameter mapping
 
                 if obj.storedParamSet(obj.instID,1) ~= obj.newParamSet(obj.instID, 1) || obj.storedParamSet(obj.instID,2) ~= obj.newParamSet(obj.instID, 2)...
                         || obj.storedParamSet(obj.instID,3) ~= obj.newParamSet(obj.instID, 3) || obj.storedParamSet(obj.instID,4) ~= obj.newParamSet(obj.instID, 4)...
-                        || obj.storedParamSet(obj.instID,5) ~= obj.newParamSet(obj.instID, 5) || obj.storedParamSet(obj.instID,6) ~= obj.newParamSet(obj.instID, 6) % synth new waveform only if parameters are changed for the triggered instrument
+                        || obj.storedParamSet(obj.instID,5) ~= obj.newParamSet(obj.instID, 5) % synth new waveform only if parameters are changed for the triggered instrument
                     obj.lpfPole = 0.00009+(0.001-0.00009)*obj.newParamSet(obj.instID,4); % scaling: v2 = a + (b-a) * v1
                     obj.m = (obj.strikeGain(length(obj.strikeGain))-obj.newParamSet(obj.instID,1)) / (length(obj.strikeGain)-1);
                     obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.newParamSet(obj.instID,1) - obj.m; % (y=mx+b)
-                    deca = obj.decay(obj.instID, 1:obj.newParamSet(obj.instID,6)); % decay and modes local variables
-                    freqs = obj.modes(obj.instID, 1:obj.newParamSet(obj.instID,6));
+                    deca = obj.decay(obj.instID, 1:obj.newParamSet(obj.instID,5)); % decay and modes local variables
+                    freqs = obj.modes(obj.instID, 1:obj.newParamSet(obj.instID,5));
                     deca = deca(deca ~= 0 ); % remove zero padding
                     freqs = freqs(freqs ~= 0 );
                     
                     % bwg
                     if (obj.instID == 1 || obj.instID == 2 || obj.instID == 4) % tom, snare, kick
-                        obj.buff(obj.instID,:) = f_bdwg(obj.instID, freqs*obj.newParamSet(obj.instID,3), deca, length(obj.buff(1,:)), obj.fs, [obj.newParamSet(obj.instID,5); 2-obj.newParamSet(obj.instID,5)], obj.lpfPole, obj.strikeGain)'; % banded waveguide
+                        obj.buff(obj.instID,:) = f_bdwg(obj.instID, freqs*obj.newParamSet(obj.instID,3), deca, length(obj.buff(1,:)), obj.fs, obj.bandwidth, obj.lpfPole, obj.strikeGain)'; % banded waveguide
                     else % cymbal
-                        obj.buff(obj.instID,:) = f_bdwg(obj.instID, freqs*obj.newParamSet(obj.instID,3), deca+(0.0001+(-0.01-0.0001))*obj.material, length(obj.buff(1,:)), obj.fs, [obj.newParamSet(obj.instID,5); 2-obj.newParamSet(obj.instID,5)], obj.lpfPole, obj.strikeGain)'; % banded waveguide
+                        obj.buff(obj.instID,:) = f_bdwg(obj.instID, freqs*obj.newParamSet(obj.instID,3), deca+(0.0001+(-0.01-0.0001))*obj.material, length(obj.buff(1,:)), obj.fs, obj.bandwidth, obj.lpfPole, obj.strikeGain)'; % banded waveguide
                     end
                     % mesh
                     if (obj.instID == 2 || obj.instID == 3) % snare, cymbal add mesh
@@ -160,7 +157,6 @@ classdef impactSynth_JT < audioPlugin
                     obj.storedParamSet(obj.instID, 3) = obj.newParamSet(obj.instID, 3);
                     obj.storedParamSet(obj.instID, 4) = obj.newParamSet(obj.instID, 4);
                     obj.storedParamSet(obj.instID, 5) = obj.newParamSet(obj.instID, 5);
-                    obj.storedParamSet(obj.instID, 6) = obj.newParamSet(obj.instID, 6);
                 end
                 %======================================================================
 
@@ -222,7 +218,7 @@ classdef impactSynth_JT < audioPlugin
     end
 end
 %----------------------------------------------------------------------------------------------------------
-function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff) % banded waveguide
+function out = f_bdwg(instID, freqs, decay, Tsamp, fs, bandwidth, damp, bandCoeff) % banded waveguide
     % Banded digital waveguide function
     
     %% variables
@@ -244,9 +240,11 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
 
     out = zeros(1, Tsamp); % output
     
-    f_low_high = low_high*freqs;
-    B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
-    % B = B';
+    % bandpass according to paper (following Steiglitz's DSP book, 1996)
+%     f_low_high = low_high*freqs;
+%     B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
+%     B = B';
+    B = bandwidth*ones(1,n_modes);
     B_rad = 2*pi/fs*B; % bandwidth in radians/samp
     psi = 2*pi/fs*freqs; % center frequencies in radians/samp
     R = 1 - B_rad/2;
@@ -255,6 +253,7 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
     
     % delay line pointers
     if (instID == 1 || instID == 2 || instID == 4) % instruments using LPF
+        % pointers
         p_out =  3*ones(1,n_modes); % pointers out
         p_out1 = 2*ones(1,n_modes);
         p_out2 = 1*ones(1,n_modes);
@@ -264,6 +263,7 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
         p_in2 = 5*ones(1,n_modes);
         p_in3 = 4*ones(1,n_modes);
         
+        % a and b coefficients
         a = zeros(n_modes, 3);
         b = zeros(n_modes, 4);
         for i = 1:n_modes
@@ -273,6 +273,7 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
             a(i,:) = [1, -(damp+u-u*damp), v*(1-damp)];
         end
         
+        % main loop
         for i=1:Tsamp
             
             out(i) = 0;
@@ -322,6 +323,7 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
             end
         end
     else                                           % instruments using predefined decay rates
+        % pointers
         p_out =  3*ones(1,n_modes);
         p_out1 = 2*ones(1,n_modes);
         p_out2 = 1*ones(1,n_modes);
@@ -330,6 +332,7 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
         p_in1 = 5*ones(1,n_modes);
         p_in2 = 4*ones(1,n_modes);
         
+        % a and b coefficients
         a = zeros(n_modes, 3);
         b = zeros(n_modes, 3);
         for i = 1:n_modes
@@ -337,6 +340,7 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
             a(i,:) = [1, -2*R(i)*cosT(i), R(i)^2]; % a coeff depending on R and cosT
         end
         
+        % main loop
         for i=1:Tsamp
             
             out(i) = 0;
@@ -382,134 +386,6 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
     end
     
     out = out / max(out);
-    
-%     %% bandpass according to paper (following Steiglitz's DSP book, 1996)
-%     
-%     f_low_high = low_high*freqs;
-%     B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
-%     % B = B';
-%     B_rad = 2*pi/fs*B; % bandwidth in radians/samp
-%     psi = 2*pi/fs*freqs; % center frequencies in radians/samp
-%     R = 1 - B_rad/2;
-%     cosT = 2*R/(1+R.^2) * cos(psi);
-%     A0 = (1-R.^2)/2; % normalization scale factor or gain adjustment
-%     
-%     % a and b coefficients bandpass and lowpass
-%     if (instID == 1 || instID == 2 || instID == 4)
-%         a = zeros(n_modes, 3);
-%         b = zeros(n_modes, 4);
-%         for i = 1:n_modes
-%             u = 2*R(i)*cosT(i);
-%             v = R(i)^2;
-%             b(i,:) = A0(i)*[1, -damp, -1, damp];
-%             a(i,:) = [1, -(damp+u-u*damp), v*(1-damp)];
-%         end
-%     else
-%         a = zeros(n_modes, 3);
-%         b = zeros(n_modes, 3);
-%         for i = 1:n_modes
-%             b(i,:) = [A0(i), 0, -A0(i)]; % b coeff dependent of scaling gain factor
-%             a(i,:) = [1, -2*R(i)*cosT(i), R(i)^2]; % a coeff depending on R and cosT
-%         end
-%     end
-% 
-%     %% main loop
-%     
-%     if (instID == 1 || instID == 2 || instID == 4)
-%         for i=1:Tsamp
-%             
-%             out(i) = 0;
-%             
-%             for j = 1:n_modes
-%                 % bandpass filter y[n] = b1*x[n] + b2*x[n-1] + b3*x[n-2] - a2*y[n-1] - a3*y[n-2]
-%                 % bandpass and lowpass
-%                 L(j, p_out(j)) = b(j,1)*L(j, p_in(j)) + b(j,2)*L(j, p_in1(j)) + b(j,3)*L(j, p_in2(j)) + b(j,4)*L(j, p_in3(j))...
-%                     - a(j,2)*L(j, p_out1(j)) - a(j,3)*L(j, p_out2(j));
-%                 out(i) = out(i) + L(j,p_out(j))*bandCoeff(j);
-%                 % update and wrap pointers
-%                 if (p_in(j)==d(j))
-%                     p_in(j)=1;
-%                 else
-%                     p_in(j)=p_in(j)+1;
-%                 end
-%                 if (p_in1(j)==d(j))
-%                     p_in1(j)=1;
-%                 else
-%                     p_in1(j)=p_in1(j)+1;
-%                 end
-%                 if (p_in2(j)==d(j))
-%                     p_in2(j)=1;
-%                 else
-%                     p_in2(j)=p_in2(j)+1;
-%                 end
-%                 if (p_in3(j)==d(j))
-%                     p_in3(j)=1;
-%                 else
-%                     p_in3(j)=p_in3(j)+1;
-%                 end
-%                 if (p_out(j)==d(j))
-%                     p_out(j)=1;
-%                 else
-%                     p_out(j)=p_out(j)+1;
-%                 end
-%                 if (p_out1(j)==d(j))
-%                     p_out1(j)=1;
-%                 else
-%                     p_out1(j)=p_out1(j)+1;
-%                 end
-%                 if (p_out2(j)==d(j))
-%                     p_out2(j)=1;
-%                 else
-%                     p_out2(j)=p_out2(j)+1;
-%                 end
-%             end
-%         end
-%     else
-%         for i=1:Tsamp
-%             
-%             out(i) = 0;
-%             
-%             for j = 1:n_modes
-%                 % bandpass filter y[n] = b1*x[n] + b2*x[n-1] + b3*x[n-2] - a2*y[n-1] - a3*y[n-2]
-%                 L(j, p_out(j)) = decay(j) * (b(j,1)*L(j, p_in(j)) + ...                               % b(j,2)*L(j, p_in1(j))... (=0)
-%                     + b(j,3)*L(j, p_in2(j)) - a(j,2)*L(j, p_out1(j)) - a(j,3)*L(j, p_out2(j)));
-%                 out(i) = out(i) + L(j,p_out(j))*bandCoeff(j);
-%                 % update and wrap pointers
-%                 if (p_in(j)==d(j))
-%                     p_in(j)=1;
-%                 else
-%                     p_in(j)=p_in(j)+1;
-%                 end
-%                 if (p_in1(j)==d(j))
-%                     p_in1(j)=1;
-%                 else
-%                     p_in1(j)=p_in1(j)+1;
-%                 end
-%                 if (p_in2(j)==d(j))
-%                     p_in2(j)=1;
-%                 else
-%                     p_in2(j)=p_in2(j)+1;
-%                 end
-%                 if (p_out(j)==d(j))
-%                     p_out(j)=1;
-%                 else
-%                     p_out(j)=p_out(j)+1;
-%                 end
-%                 if (p_out1(j)==d(j))
-%                     p_out1(j)=1;
-%                 else
-%                     p_out1(j)=p_out1(j)+1;
-%                 end
-%                 if (p_out2(j)==d(j))
-%                     p_out2(j)=1;
-%                 else
-%                     p_out2(j)=p_out2(j)+1;
-%                 end
-%             end
-%         end
-%     end
-%     
-%     out = out / max(out);
     
 end
 %% ========================================================================
