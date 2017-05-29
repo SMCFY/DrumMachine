@@ -28,7 +28,7 @@ exc_size = 20;
 exc_pos = 50;
 a = -0.0001;
 decayFactor = 0.99999;
-%y_mesh = f_mesh_square( NJ, decayFactor, a, exc_size, exc_pos, 44100, fs );
+y_mesh = f_mesh_square( NJ, decayFactor, a, exc_size, exc_pos, 44100, fs );
 
 %% bdwg (for low freqs)
 
@@ -45,8 +45,8 @@ y_bdwg = f_bdwg( freqs, B, decay, Tsamp, fs, low_high, damp );
 
 %% put everything together
 
-%y1 = [y_mesh zeros(1,length(y_bdwg)-length(y_mesh))] + y_bdwg;
-y1 = y_bdwg;
+y1 = [y_mesh zeros(1,length(y_bdwg)-length(y_mesh))] + y_bdwg;
+%y1 = y_bdwg;
 y2 = conv(y1, res);
 
 y2=ifft(fft(y1) .* fft([res; zeros(length(y1)-length(res),1)]'));

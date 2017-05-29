@@ -146,7 +146,7 @@ classdef impactSynth_JT < audioPlugin
                     end
                     % mesh
                     if (obj.instID == 2 || obj.instID == 3) % snare, cymbal add mesh
-                        obj.buff(obj.instID,:) = obj.buff(obj.instID,:) + f_mesh_square(10, 0.99999, obj.fs, length(obj.buff(obj.instID,:)));
+                        obj.buff(obj.instID,:) = obj.buff(obj.instID,:) + f_mesh_square( 10, 0.99999, obj.fs,  );
                     end
     
                     obj.buff(obj.instID,:) = real(ifft(fft(obj.buff(obj.instID,:)) .* fft(obj.resPadded(obj.instID,:)))); % convolution with residual (multiplication of spectrums)
@@ -500,6 +500,6 @@ for i = 1:Tsamp
     % sound output pick up location
     y(i) = v(NJ-1,NJ-1);
 end
-y=[y zeros(1,tim-length(y))];
-fuck=0;
+y=[y zeros(length(tim)-length(y))];
+
 end

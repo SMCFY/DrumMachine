@@ -6,7 +6,7 @@
 
 fs = 44100; % sampling frequency
 
-Tsec = 1; % duration of simulation (Seconds)
+Tsec = 0.6; % duration of simulation (Seconds)
 Tsamp = Tsec*fs; % duration of simulation (Samples)
 %Tsamp = round(length(cymOriginal)/2);
 
