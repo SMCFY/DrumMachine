@@ -135,8 +135,8 @@ classdef impactSynth_JT < audioPlugin
                     obj.strikeGain = obj.m * [1:length(obj.strikeGain)] + obj.newParamSet(obj.instID,1) - obj.m; % (y=mx+b)
                     deca = obj.decay(obj.instID, 1:obj.newParamSet(obj.instID,6)); % decay and modes local variables
                     freqs = obj.modes(obj.instID, 1:obj.newParamSet(obj.instID,6));
-                    deca = deca(deca ~=0 ); % remove zero padding
-                    freqs = freqs(freqs ~=0 );
+                    deca = deca(deca ~= 0 ); % remove zero padding
+                    freqs = freqs(freqs ~= 0 );
                     
                     % bwg
                     if (obj.instID == 1 || obj.instID == 2 || obj.instID == 4) % tom, snare, kick
@@ -244,6 +244,15 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
 
     out = zeros(1, Tsamp); % output
     
+    f_low_high = low_high*freqs;
+    B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
+    % B = B';
+    B_rad = 2*pi/fs*B; % bandwidth in radians/samp
+    psi = 2*pi/fs*freqs; % center frequencies in radians/samp
+    R = 1 - B_rad/2;
+    cosT = 2*R/(1+R.^2) * cos(psi);
+    A0 = (1-R.^2)/2; % normalization scale factor or gain adjustment
+    
     % delay line pointers
     if (instID == 1 || instID == 2 || instID == 4) % instruments using LPF
         p_out =  3*ones(1,n_modes); % pointers out
@@ -254,30 +263,7 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
         p_in1 = 6*ones(1,n_modes);
         p_in2 = 5*ones(1,n_modes);
         p_in3 = 4*ones(1,n_modes);
-    else                                           % instruments using predefined decay rates
-        p_out =  3*ones(1,n_modes);
-        p_out1 = 2*ones(1,n_modes);
-        p_out2 = 1*ones(1,n_modes);
         
-        p_in =  6*ones(1,n_modes);
-        p_in1 = 5*ones(1,n_modes);
-        p_in2 = 4*ones(1,n_modes);
-    end
-    
-    %% bandpass according to paper (following Steiglitz's DSP book, 1996)
-    
-    f_low_high = low_high*freqs;
-    B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
-    % B = B';
-    B_rad = 2*pi/fs*B; % bandwidth in radians/samp
-    psi = 2*pi/fs*freqs; % center frequencies in radians/samp
-    R = 1 - B_rad/2;
-    cosT = 2*R/(1+R.^2) * cos(psi);
-    A0 = (1-R.^2)/2; % normalization scale factor or gain adjustment
-    % A0 = sqrt(A0);
-    
-    % a and b coefficients bandpass and lowpass
-    if (instID == 1 || instID == 2 || instID == 4)
         a = zeros(n_modes, 3);
         b = zeros(n_modes, 4);
         for i = 1:n_modes
@@ -286,18 +272,7 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
             b(i,:) = A0(i)*[1, -damp, -1, damp];
             a(i,:) = [1, -(damp+u-u*damp), v*(1-damp)];
         end
-    else
-        a = zeros(n_modes, 3);
-        b = zeros(n_modes, 3);
-        for i = 1:n_modes
-            b(i,:) = [A0(i), 0, -A0(i)]; % b coeff dependent of scaling gain factor
-            a(i,:) = [1, -2*R(i)*cosT(i), R(i)^2]; % a coeff depending on R and cosT
-        end
-    end
-
-    %% main loop
-    
-    if (instID == 1 || instID == 2 || instID == 4)
+        
         for i=1:Tsamp
             
             out(i) = 0;
@@ -346,7 +321,22 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
                 end
             end
         end
-    else
+    else                                           % instruments using predefined decay rates
+        p_out =  3*ones(1,n_modes);
+        p_out1 = 2*ones(1,n_modes);
+        p_out2 = 1*ones(1,n_modes);
+        
+        p_in =  6*ones(1,n_modes);
+        p_in1 = 5*ones(1,n_modes);
+        p_in2 = 4*ones(1,n_modes);
+        
+        a = zeros(n_modes, 3);
+        b = zeros(n_modes, 3);
+        for i = 1:n_modes
+            b(i,:) = [A0(i), 0, -A0(i)]; % b coeff dependent of scaling gain factor
+            a(i,:) = [1, -2*R(i)*cosT(i), R(i)^2]; % a coeff depending on R and cosT
+        end
+        
         for i=1:Tsamp
             
             out(i) = 0;
@@ -393,11 +383,139 @@ function out = f_bdwg(instID, freqs, decay, Tsamp, fs, low_high, damp, bandCoeff
     
     out = out / max(out);
     
+%     %% bandpass according to paper (following Steiglitz's DSP book, 1996)
+%     
+%     f_low_high = low_high*freqs;
+%     B = f_low_high(2,:) - f_low_high(1,:); % bandwidth
+%     % B = B';
+%     B_rad = 2*pi/fs*B; % bandwidth in radians/samp
+%     psi = 2*pi/fs*freqs; % center frequencies in radians/samp
+%     R = 1 - B_rad/2;
+%     cosT = 2*R/(1+R.^2) * cos(psi);
+%     A0 = (1-R.^2)/2; % normalization scale factor or gain adjustment
+%     
+%     % a and b coefficients bandpass and lowpass
+%     if (instID == 1 || instID == 2 || instID == 4)
+%         a = zeros(n_modes, 3);
+%         b = zeros(n_modes, 4);
+%         for i = 1:n_modes
+%             u = 2*R(i)*cosT(i);
+%             v = R(i)^2;
+%             b(i,:) = A0(i)*[1, -damp, -1, damp];
+%             a(i,:) = [1, -(damp+u-u*damp), v*(1-damp)];
+%         end
+%     else
+%         a = zeros(n_modes, 3);
+%         b = zeros(n_modes, 3);
+%         for i = 1:n_modes
+%             b(i,:) = [A0(i), 0, -A0(i)]; % b coeff dependent of scaling gain factor
+%             a(i,:) = [1, -2*R(i)*cosT(i), R(i)^2]; % a coeff depending on R and cosT
+%         end
+%     end
+% 
+%     %% main loop
+%     
+%     if (instID == 1 || instID == 2 || instID == 4)
+%         for i=1:Tsamp
+%             
+%             out(i) = 0;
+%             
+%             for j = 1:n_modes
+%                 % bandpass filter y[n] = b1*x[n] + b2*x[n-1] + b3*x[n-2] - a2*y[n-1] - a3*y[n-2]
+%                 % bandpass and lowpass
+%                 L(j, p_out(j)) = b(j,1)*L(j, p_in(j)) + b(j,2)*L(j, p_in1(j)) + b(j,3)*L(j, p_in2(j)) + b(j,4)*L(j, p_in3(j))...
+%                     - a(j,2)*L(j, p_out1(j)) - a(j,3)*L(j, p_out2(j));
+%                 out(i) = out(i) + L(j,p_out(j))*bandCoeff(j);
+%                 % update and wrap pointers
+%                 if (p_in(j)==d(j))
+%                     p_in(j)=1;
+%                 else
+%                     p_in(j)=p_in(j)+1;
+%                 end
+%                 if (p_in1(j)==d(j))
+%                     p_in1(j)=1;
+%                 else
+%                     p_in1(j)=p_in1(j)+1;
+%                 end
+%                 if (p_in2(j)==d(j))
+%                     p_in2(j)=1;
+%                 else
+%                     p_in2(j)=p_in2(j)+1;
+%                 end
+%                 if (p_in3(j)==d(j))
+%                     p_in3(j)=1;
+%                 else
+%                     p_in3(j)=p_in3(j)+1;
+%                 end
+%                 if (p_out(j)==d(j))
+%                     p_out(j)=1;
+%                 else
+%                     p_out(j)=p_out(j)+1;
+%                 end
+%                 if (p_out1(j)==d(j))
+%                     p_out1(j)=1;
+%                 else
+%                     p_out1(j)=p_out1(j)+1;
+%                 end
+%                 if (p_out2(j)==d(j))
+%                     p_out2(j)=1;
+%                 else
+%                     p_out2(j)=p_out2(j)+1;
+%                 end
+%             end
+%         end
+%     else
+%         for i=1:Tsamp
+%             
+%             out(i) = 0;
+%             
+%             for j = 1:n_modes
+%                 % bandpass filter y[n] = b1*x[n] + b2*x[n-1] + b3*x[n-2] - a2*y[n-1] - a3*y[n-2]
+%                 L(j, p_out(j)) = decay(j) * (b(j,1)*L(j, p_in(j)) + ...                               % b(j,2)*L(j, p_in1(j))... (=0)
+%                     + b(j,3)*L(j, p_in2(j)) - a(j,2)*L(j, p_out1(j)) - a(j,3)*L(j, p_out2(j)));
+%                 out(i) = out(i) + L(j,p_out(j))*bandCoeff(j);
+%                 % update and wrap pointers
+%                 if (p_in(j)==d(j))
+%                     p_in(j)=1;
+%                 else
+%                     p_in(j)=p_in(j)+1;
+%                 end
+%                 if (p_in1(j)==d(j))
+%                     p_in1(j)=1;
+%                 else
+%                     p_in1(j)=p_in1(j)+1;
+%                 end
+%                 if (p_in2(j)==d(j))
+%                     p_in2(j)=1;
+%                 else
+%                     p_in2(j)=p_in2(j)+1;
+%                 end
+%                 if (p_out(j)==d(j))
+%                     p_out(j)=1;
+%                 else
+%                     p_out(j)=p_out(j)+1;
+%                 end
+%                 if (p_out1(j)==d(j))
+%                     p_out1(j)=1;
+%                 else
+%                     p_out1(j)=p_out1(j)+1;
+%                 end
+%                 if (p_out2(j)==d(j))
+%                     p_out2(j)=1;
+%                 else
+%                     p_out2(j)=p_out2(j)+1;
+%                 end
+%             end
+%         end
+%     end
+%     
+%     out = out / max(out);
+    
 end
 %% ========================================================================
 
 function y = f_mesh_square( NJ, decayFactor, fs, tim)
-
+y = zeros(1,tim);
 a = 0.001;
 Tsamp=round(0.6*fs);
 excite_size = ceil(NJ/5); % excitation size
@@ -501,5 +619,4 @@ for i = 1:Tsamp
     y(i) = v(NJ-1,NJ-1);
 end
 y=[y zeros(1,tim-length(y))];
-fuck=0;
 end
