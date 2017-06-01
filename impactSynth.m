@@ -6,7 +6,7 @@ classdef impactSynth < audioPlugin
         strikePos = 1;
         strikeVig = 1;
         dimension = 1;
-        material = 0;
+        material = 0.1;
         n_Modes = 24;
 
         paramID = 1; % parameter ID (selected instrument)
@@ -60,7 +60,7 @@ classdef impactSynth < audioPlugin
            audioPluginParameter('strikePos','DisplayName','StrikePosition','Mapping',{'lin',0,1}),...
            audioPluginParameter('strikeVig','DisplayName','StrikeVigor','Mapping',{'lin',0,1}),...
            audioPluginParameter('dimension','DisplayName','Dimension','Mapping',{'lin',0.5,1.3}),...
-           audioPluginParameter('material','DisplayName','Material','Mapping',{'lin',0,1}),...
+           audioPluginParameter('material','DisplayName','Material','Mapping',{'lin',0.1,1}),...
            audioPluginParameter('n_Modes','DisplayName','Richness','Mapping',{'int',1,55}),...
            audioPluginParameter('paramID','DisplayName','ParameterID','Mapping',{'int',1,4}),...
            audioPluginParameter('instID','DisplayName','ID','Mapping',{'int',1,4}),...
@@ -143,7 +143,7 @@ classdef impactSynth < audioPlugin
                     end
                     % mesh
                     if (obj.instID == 2 || obj.instID == 3) % snare, cymbal add mesh
-                        obj.buff(obj.instID,:) = obj.buff(obj.instID,:) + f_mesh_square(10, 0.99999, obj.fs, length(obj.buff(obj.instID,:)));
+                        obj.buff(obj.instID,:) = obj.buff(obj.instID,:) + f_mesh_square(10, 0.999+(0.9-0.999)*obj.material, obj.fs, length(obj.buff(obj.instID,:)));
                     end
     
                     obj.buff(obj.instID,:) = real(ifft(fft(obj.buff(obj.instID,:)) .* fft(obj.resPadded(obj.instID,:)))); % convolution with residual (multiplication of spectrums)
